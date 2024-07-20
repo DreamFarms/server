@@ -1,9 +1,6 @@
 package com.server.esgcafe.domain.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -19,4 +16,7 @@ public class Ingredient {
 
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name = "game_no")
+    private Game game;
 }

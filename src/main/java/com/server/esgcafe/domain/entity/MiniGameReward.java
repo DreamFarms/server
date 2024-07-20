@@ -15,8 +15,11 @@ public class MiniGameReward {
     private Long miniGameRewardNo;
 
     @ManyToOne
+    @JoinColumn(name = "mini_game_no")
+    private MiniGame miniGame;
+
+    @ManyToOne
     @JoinColumn(name = "reward_no")
     private Reward reward;
 
-    private double probability; // 보상이 나오는 확률
 }
