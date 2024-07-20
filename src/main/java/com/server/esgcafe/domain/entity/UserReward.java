@@ -8,18 +8,16 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class MiniGameReward {
+public class UserReward extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long miniGameRewardNo;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "mini_game_no")
-    private MiniGame miniGame;
+//    @ManyToOne
+//    @JoinColumn(name = "user_no", nullable = false)
+//    private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "reward_no")
-    private Reward reward;
-
+    private String rewardName;
+    private int rewardCount;
 }

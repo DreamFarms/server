@@ -1,0 +1,22 @@
+package com.server.esgcafe.domain.dto;
+
+import com.server.esgcafe.domain.entity.UserReward;
+import lombok.*;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserRewardInfo {
+
+    private String name;
+    private int count;
+
+    public UserReward toEntity() {
+        return UserReward.builder()
+                .rewardName(this.name)
+                .rewardCount(this.count)
+                .build();
+    }
+}

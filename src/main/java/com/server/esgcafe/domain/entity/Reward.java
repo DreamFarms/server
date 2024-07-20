@@ -1,10 +1,7 @@
 package com.server.esgcafe.domain.entity;
 
 import com.server.esgcafe.domain.enum_class.RewardType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -22,5 +19,9 @@ public class Reward {
     private RewardType rewardType;
 
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "miniGame_id")
+    private MiniGame miniGame;
 
 }
