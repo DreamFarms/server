@@ -1,4 +1,4 @@
-package com.server.esgcafe.domain.dto;
+package com.server.esgcafe.domain.dto.UserReward;
 
 import lombok.*;
 
