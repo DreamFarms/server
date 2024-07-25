@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "DB 에러"),
+    DUPLICATED_NICKNAME(HttpStatus.CONFLICT, "이미 등록되어있는 닉네임 입니다."),
+
 
 
     ;
