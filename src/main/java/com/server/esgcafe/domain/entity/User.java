@@ -16,17 +16,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userNo;
 
-    private String googleId;
-    private String steamId;
+//    private String googleId;
+//    private String steamId;
 
-    @Column(name = "login_time")
-    private Instant loginTime;
+//    @Column(name = "login_time")
+//    private Instant loginTime;
 
-    @Column(name = "logout_time")
-    private Instant logoutTime;
+//    @Column(name = "logout_time")
+//    private Instant logoutTime;
 
     private String nickName;
 
-    private String image;
+//    private String image;
 
 }
