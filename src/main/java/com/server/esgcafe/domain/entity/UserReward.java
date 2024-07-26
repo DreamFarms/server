@@ -14,9 +14,9 @@ public class UserReward extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "user_no", nullable = false)
-//    private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_no", nullable = false)
+    private User user;
 
     private String rewardName;
     private int rewardCount;
