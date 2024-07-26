@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UserRewardSaveRequest {
 
+    private String nickname;
     private List<UserRewardInfo> rewards;
 
 }
