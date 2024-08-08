@@ -14,12 +14,12 @@ public class FoodIngredient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long foodIngredientNo;
 
-    @JoinColumn(name = "food_no")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "food_no", nullable = false)
     private Food food;
 
-    @JoinColumn(name = "ingredient_no")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ingredient_no", nullable = false)
     private Ingredient ingredient;
 
     @Column(nullable = false)
