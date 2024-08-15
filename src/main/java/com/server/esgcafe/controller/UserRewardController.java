@@ -1,7 +1,7 @@
 package com.server.esgcafe.controller;
 
-import com.server.esgcafe.domain.dto.UserReward.UserRewardSaveRequest;
-import com.server.esgcafe.domain.dto.UserReward.UserRewardSaveResponse;
+import com.server.esgcafe.domain.dto.userReward.UserRewardSaveRequest;
+import com.server.esgcafe.domain.dto.userReward.UserRewardSaveResponse;
 import com.server.esgcafe.exception.Response;
 import com.server.esgcafe.service.UserRewardService;
 import lombok.RequiredArgsConstructor;

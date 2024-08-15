@@ -1,4 +1,4 @@
-package com.server.esgcafe.domain.dto.UserReward;
+package com.server.esgcafe.domain.dto.userReward;
 
 import com.server.esgcafe.domain.entity.UserReward;
 import lombok.AllArgsConstructor;

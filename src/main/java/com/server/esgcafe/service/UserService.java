@@ -1,7 +1,7 @@
 package com.server.esgcafe.service;
 
-import com.server.esgcafe.domain.dto.User.UserRequest;
-import com.server.esgcafe.domain.dto.User.UserResponse;
+import com.server.esgcafe.domain.dto.user.UserRequest;
+import com.server.esgcafe.domain.dto.user.UserResponse;
 import com.server.esgcafe.domain.entity.User;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;

@@ -1,8 +1,8 @@
 package com.server.esgcafe.service;
 
-import com.server.esgcafe.domain.dto.UserReward.UserRewardInfo;
-import com.server.esgcafe.domain.dto.UserReward.UserRewardSaveRequest;
-import com.server.esgcafe.domain.dto.UserReward.UserRewardSaveResponse;
+import com.server.esgcafe.domain.dto.userReward.UserRewardInfo;
+import com.server.esgcafe.domain.dto.userReward.UserRewardSaveRequest;
+import com.server.esgcafe.domain.dto.userReward.UserRewardSaveResponse;
 import com.server.esgcafe.domain.entity.User;
 import com.server.esgcafe.domain.entity.UserReward;
 import com.server.esgcafe.exception.AppException;
@@ -30,7 +30,7 @@ public class UserRewardService {
         log.info("🍞UserReward 저장 시작");
 
         User user = userRepository.findByNickName(request.getNickname())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         UserRewardSaveResponse response = null;
 
