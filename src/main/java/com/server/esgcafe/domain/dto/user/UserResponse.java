@@ -1,4 +1,4 @@
-package com.server.esgcafe.domain.dto.User;
+package com.server.esgcafe.domain.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.server.esgcafe.controller;
 
-import com.server.esgcafe.domain.dto.User.UserRequest;
-import com.server.esgcafe.domain.dto.User.UserResponse;
+import com.server.esgcafe.domain.dto.user.UserRequest;
+import com.server.esgcafe.domain.dto.user.UserResponse;
 import com.server.esgcafe.exception.Response;
 import com.server.esgcafe.service.UserService;
 import jakarta.validation.Valid;
