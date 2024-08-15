@@ -1,0 +1,57 @@
+#github repo Actions 이름
+name: CI/CD
+
+on:
+  push:
+    branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
+
+permissions: write-all
+
+jobs:
+  build-and-deploy:
+    # ubuntu 최신버전에서 실행
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          submodules: true
+          # 자바 버전설정
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+      - name: Add permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build -x test
+
+      - name: Docker build & push to docker repo
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}/esg-cafe .
+          docker push ${{ secrets.DOCKER_REPO }}/esg-cafe
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        id: deploy
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_PEMKEY }}
+          envs: GITHUB_SHA
+          script: |
+            sudo docker stop esg-cafe
+            sudo docker rm esg-cafe
+            sudo docker pull ${{ secrets.DOCKER_REPO }}/esg-cafe
+            sudo docker run --name esg-cafe -d --network host -p 8081:8081 -e SPRING_DATASOURCE_URL="jdbc:mysql://${{ secrets.EC2_HOST }}:3306/esgcafe?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" -e SPRING_DATASOURCE_USERNAME=${{ secrets.MYSQL_USERNAME }} -e SPRING_DATASOURCE_PASSWORD=${{ secrets.MYSQL_PASSWORD }} ${{ secrets.DOCKER_REPO }}/esg-cafe
+            sudo docker image prune -f
+            sudo docker logs esg-cafe
