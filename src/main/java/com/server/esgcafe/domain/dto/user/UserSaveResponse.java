@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserResponse {
+public class UserSaveResponse {
     private String nickname;
 
-    public static UserResponse from(String nickname) {
-        return new UserResponse(nickname);
+    public static UserSaveResponse from(String nickname) {
+        return new UserSaveResponse(nickname);
     }
 }

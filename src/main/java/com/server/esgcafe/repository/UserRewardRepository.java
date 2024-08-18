@@ -13,4 +13,5 @@ public interface UserRewardRepository extends JpaRepository<UserReward, Long> {
 
     Optional<UserReward> findByRewardName(String rewardName);
     List<UserReward> findByUser(User user);
+    Optional<UserReward> findByUserAndRewardName(User user, String rewardName);
 }
