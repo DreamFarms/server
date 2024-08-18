@@ -20,4 +20,13 @@ public class UserReward extends BaseEntity{
 
     private String rewardName;
     private int rewardCount;
+
+    public UserReward withUpdatedRewardCount(int newRewardCount) {
+        return UserReward.builder()
+                .id(this.id)
+                .user(this.user)
+                .rewardName(this.rewardName)
+                .rewardCount(newRewardCount)
+                .build();
+    }
 }
