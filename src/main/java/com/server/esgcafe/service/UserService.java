@@ -1,7 +1,7 @@
 package com.server.esgcafe.service;
 
-import com.server.esgcafe.domain.dto.user.UserRequest;
-import com.server.esgcafe.domain.dto.user.UserResponse;
+import com.server.esgcafe.domain.dto.user.UserSaveRequest;
+import com.server.esgcafe.domain.dto.user.UserSaveResponse;
 import com.server.esgcafe.domain.entity.User;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
@@ -20,7 +20,7 @@ public class UserService {
     private final UserRepository userRepository;
 
 
-    public UserResponse processUser(UserRequest request) {
+    public UserSaveResponse processUser(UserSaveRequest request) {
 
         log.info("🍞nickname : {}", request.getNickname());
 
@@ -33,7 +33,7 @@ public class UserService {
             // 사용자가 존재하지 않는 경우, 새로 생성
             User newUser = request.toEntity();
             User savedUser = userRepository.save(newUser);
-            return UserResponse.from(savedUser.getNickName());
+            return UserSaveResponse.from(savedUser.getNickName());
         }
     }
 }

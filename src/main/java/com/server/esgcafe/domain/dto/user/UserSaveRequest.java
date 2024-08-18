@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequest {
+public class UserSaveRequest {
 
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Size(max = 5, message = "닉네임은 5글자 이하여야 합니다.")

@@ -1,7 +1,7 @@
 package com.server.esgcafe.controller;
 
-import com.server.esgcafe.domain.dto.user.UserRequest;
-import com.server.esgcafe.domain.dto.user.UserResponse;
+import com.server.esgcafe.domain.dto.user.UserSaveRequest;
+import com.server.esgcafe.domain.dto.user.UserSaveResponse;
 import com.server.esgcafe.exception.Response;
 import com.server.esgcafe.service.UserService;
 import jakarta.validation.Valid;
@@ -19,9 +19,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/save")
-    public Response<UserResponse> savedUser(@RequestBody @Valid UserRequest request) {
+    public Response<UserSaveResponse> savedUser(@RequestBody @Valid UserSaveRequest request) {
 
-        UserResponse response = userService.processUser(request);
+        UserSaveResponse response = userService.processUser(request);
         return Response.success(response);
     }
 }
