@@ -50,7 +50,11 @@ public class FoodService {
                     .orElse(null);
 
             if (userReward == null || userReward.getRewardCount() < requiredQuantity) {
-                return FoodCheckResponse.cannotMake("재료가 부족하여 빵을 만들 수 없습니다.");
+
+                FoodCheckResponse response = FoodCheckResponse.cannotMake("재료가 부족하여 빵을 만들 수 없습니다.");
+                log.info("🍞checkUserCanMakeFood 실패 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
+
+                return response;
             }
         }
 
@@ -62,7 +66,10 @@ public class FoodService {
                 .map(ur -> new UserRewardDTO(ur.getRewardName(), ur.getRewardCount()))
                 .collect(Collectors.toList());
 
-        return FoodCheckResponse.canMake("빵을 만들 수 있습니다.", foodIngredientDTOs, userRewardDTOs);
+        FoodCheckResponse response = FoodCheckResponse.canMake("빵을 만들 수 있습니다.", foodIngredientDTOs, userRewardDTOs);
+        log.info("🍞checkUserCanMakeFood 성공 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
+
+        return response;
     }
 
     @Transactional
