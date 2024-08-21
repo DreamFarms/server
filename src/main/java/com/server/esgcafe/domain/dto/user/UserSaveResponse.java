@@ -6,9 +6,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class UserSaveResponse {
+
     private String nickname;
 
     public static UserSaveResponse from(String nickname) {
         return new UserSaveResponse(nickname);
     }
+
 }

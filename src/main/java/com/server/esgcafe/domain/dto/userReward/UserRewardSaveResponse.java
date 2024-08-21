@@ -12,14 +12,15 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRewardSaveResponse {
+public class UserRewardSaveResponse{
 
-    private boolean isSaved;
-    private LocalDateTime saveTime;
+private boolean isSaved;
+private LocalDateTime saveTime;
 
-    public UserRewardSaveResponse(UserReward userReward) {
-        this.isSaved = true;
-        this.saveTime = userReward.getCreatedAt();
-    }
+public UserRewardSaveResponse(UserReward userReward) {
+    this.isSaved = true;
+    this.saveTime = userReward.getCreatedAt();
+}
 
 }
+

@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Game {
+public class Game extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,15 +18,11 @@ public class Game {
 
     private int level;
 
-    private int currency;
+    private int revenue;
 
     private int cash;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-    private List<Food> foods; // 게임에서 보유한 음식 목록
-
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-    private List<Ingredient> ingredients; // 게임에서 보유한 재료 목록
+    private int totalVisitors;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no")
