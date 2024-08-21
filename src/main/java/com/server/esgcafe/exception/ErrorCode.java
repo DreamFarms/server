@@ -14,8 +14,7 @@ public enum ErrorCode {
     FOOD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 빵이 존재하지 않습니다."),
     REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 재료가 존재하지 않습니다."),
     NOT_ENOUGH_BREAD(HttpStatus.NOT_FOUND, "보유한 빵의 개수가 충분하지 않습니다."),
-
-
+    GAME_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게임이 존재하지 않습니다."),
     ;
 
     private HttpStatus status;

@@ -16,7 +16,4 @@ public class Ingredient {
 
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "game_no")
-    private Game game;
 }

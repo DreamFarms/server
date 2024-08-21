@@ -1,5 +1,7 @@
 package com.server.esgcafe.domain.entity;
 
+import com.server.esgcafe.exception.AppException;
+import com.server.esgcafe.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,5 +34,14 @@ public class UserBread extends BaseEntity{
         existingUserBread.updateBreadCount(existingUserBread.getBreadCount() + additionalBreadCount);
         return existingUserBread;
     }
+
+    // 빵 개수 차감
+    public void subtractBreadCount(int soldBreadCount) {
+        if (this.breadCount < soldBreadCount) {
+            throw new AppException(ErrorCode.NOT_ENOUGH_BREAD);
+        }
+        this.breadCount -= soldBreadCount;
+    }
+
 
 }
