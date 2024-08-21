@@ -68,6 +68,8 @@ public class FoodService {
 
         FoodCheckResponse response = FoodCheckResponse.canMake("빵을 만들 수 있습니다.", foodIngredientDTOs, userRewardDTOs);
         log.info("🍞checkUserCanMakeFood 성공 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
+        log.info("🍞필요한 재료: {}", foodIngredientDTOs);
+        log.info("🍞유저 보유 재료: {}", userRewardDTOs);
 
         return response;
     }
