@@ -21,6 +21,14 @@ public class UserService {
     public UserSaveResponse processUser(UserSaveRequest request) {
 
         log.info("🍞nickname : {}", request.getNickname());
+        log.info("🍞nickname length : {}", request.getNickname().length());
+
+        // 닉네임 길이 검증
+        if (request.getNickname().length() > 5) {
+            String errorMessage = "닉네임은 5글자 이하여야 합니다.";
+            log.error("🍞Validation failed: {}", errorMessage);
+            throw new IllegalArgumentException(errorMessage); // 적절한 예외를 던진다.
+        }
 
         // 닉네임의 각 문자와 유니코드 값을 출력
         for (int i = 0; i < request.getNickname().length(); i++) {
@@ -29,8 +37,6 @@ public class UserService {
         }
 
         Optional<User> existingUser = userRepository.findByNickName(request.getNickname());
-
-        log.info("🍞nickname length : {}", request.getNickname().length());
 
         if (existingUser.isPresent()) {
             // 사용자가 이미 존재하는 경우 -> 로그인 처리
