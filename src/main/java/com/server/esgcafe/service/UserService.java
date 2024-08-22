@@ -22,32 +22,35 @@ public class UserService {
 
     public UserSaveResponse processUser(UserSaveRequest request) {
 
-        log.info("🍞nickname : {}", request.getNickname());
-        log.info("🍞nickname length : {}", request.getNickname().length());
+        String nickname = request.getNickname().trim(); // 앞뒤 공백 제거
+        nickname = nickname.replaceAll("[\\p{Zs}\\u200B]", "");  // ZWS를 빈 문자열로 대체
+
+        log.info("🍞nickname : {}", nickname);
+        log.info("🍞nickname length : {}", nickname.length());
 
         // 닉네임의 각 문자와 유니코드 값을 출력
-        for (int i = 0; i < request.getNickname().length(); i++) {
-            char c = request.getNickname().charAt(i);
+        for (int i = 0; i < nickname.length(); i++) {
+            char c = nickname.charAt(i);
             log.info("🍞char at {}: '{}', Unicode: {}", i, c, (int) c);
         }
 
         // 닉네임 길이 검증
-        if (request.getNickname().length() > 5) {
+        if (nickname.length() > 5) {
             String errorMessage = "닉네임은 5글자 이하여야 합니다.";
             log.error("🍞Validation failed: {}", errorMessage);
             throw new AppException(ErrorCode.INVALID_NICKNAME_LENGTH);
         }
 
-        Optional<User> existingUser = userRepository.findByNickName(request.getNickname());
+        Optional<User> existingUser = userRepository.findByNickName(nickname);
 
         if (existingUser.isPresent()) {
             // 사용자가 이미 존재하는 경우 -> 로그인 처리
-            log.info("🍞User '{}' found, logging in...", request.getNickname());
+            log.info("🍞User '{}' found, logging in...", nickname);
             User user = existingUser.get();
             return UserSaveResponse.from(user, "Login successful");
         } else {
             // 사용자가 존재하지 않는 경우 -> 회원 가입 처리
-            log.info("🍞User '{}' not found, creating new user...", request.getNickname());
+            log.info("🍞User '{}' not found, creating new user...", nickname);
             User newUser = request.toEntity();
             User savedUser = userRepository.save(newUser);
             return UserSaveResponse.from(savedUser, "Signup successful");
