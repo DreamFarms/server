@@ -1,5 +1,6 @@
 package com.server.esgcafe.domain.dto.user;
 
+import com.server.esgcafe.domain.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,9 +9,10 @@ import lombok.Getter;
 public class UserSaveResponse {
 
     private String nickname;
+    private String message;
 
-    public static UserSaveResponse from(String nickname) {
-        return new UserSaveResponse(nickname);
+    public static UserSaveResponse from(User user, String message) {
+        return new UserSaveResponse(user.getNickName(), message);
     }
 
 }
