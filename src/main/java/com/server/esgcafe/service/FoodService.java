@@ -106,13 +106,15 @@ public class FoodService {
             userBreadRepository.save(userBread);
         } catch (Exception e) {
             // 빵 저장 중 오류 발생 시, 리워드 차감도 롤백되도록 설정
-            throw new RuntimeException("Failed to save bread", e);
+            throw new RuntimeException("🍞Failed to save bread", e);
         }
 
         for(RemainingIngredient ingredient : request.getRemainingIngredients()) {
 
             String ingredientName = ingredient.getIngredientName();
             int remainingQuantity = ingredient.getRemainingQuantity();
+
+            log.info("🍞 차감된 재료 정보 - 이름 : {}, 남은 개수 : {}", ingredientName, remainingQuantity);
 
             UserReward userReward = userRewardRepository.findByUserAndRewardName(user, ingredientName)
                     .orElseThrow(() -> new AppException(ErrorCode.REWARD_NOT_FOUND));
