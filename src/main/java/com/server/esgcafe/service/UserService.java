@@ -2,15 +2,22 @@ package com.server.esgcafe.service;
 
 import com.server.esgcafe.domain.dto.user.UserSaveRequest;
 import com.server.esgcafe.domain.dto.user.UserSaveResponse;
+import com.server.esgcafe.domain.dto.userBread.BreadInfo;
+import com.server.esgcafe.domain.dto.userBread.UserBreadInfoResponse;
 import com.server.esgcafe.domain.entity.User;
+import com.server.esgcafe.domain.entity.UserBread;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
+import com.server.esgcafe.repository.UserBreadRepository;
 import com.server.esgcafe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +25,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-
+    private final UserBreadRepository userBreadRepository;
 
     public UserSaveResponse processUser(UserSaveRequest request) {
 
@@ -55,5 +62,36 @@ public class UserService {
             User savedUser = userRepository.save(newUser);
             return UserSaveResponse.from(savedUser, "Signup successful");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public UserBreadInfoResponse userBreadInfo(String nickname) {
+
+        log.info("🍞nickname : {}", nickname);
+
+        // 유저 조회
+        User user = userRepository.findByNickName(nickname)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // 유저의 빵 리스트 조회
+        List<UserBread> userBreads = userBreadRepository.findByUser(user);
+
+        // 빵 리스트와 개수 추출
+        List<BreadInfo> breadInfoList = userBreads.stream()
+                .collect(Collectors.groupingBy(
+                        bread -> bread.getFood().getName(),  // 빵의 이름
+                        Collectors.summingInt(UserBread::getBreadCount)  // 개수 합산
+                ))
+                .entrySet().stream()
+                .map(entry -> new BreadInfo(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+
+        // 빵 리스트 로그 출력
+        for (BreadInfo breadInfo : breadInfoList) {
+            log.info("🍞 Bread: {}, Count: {}", breadInfo.getName(), breadInfo.getCount());
+        }
+
+        // 응답 객체 생성
+        return new UserBreadInfoResponse(breadInfoList);
     }
 }
