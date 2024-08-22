@@ -29,4 +29,9 @@ public class UserReward extends BaseEntity{
                 .rewardCount(newRewardCount)
                 .build();
     }
+
+    // 개수 업데이트 메서드
+    public void updateCount(int newCount) {
+        this.rewardCount = newCount;
+    }
 }

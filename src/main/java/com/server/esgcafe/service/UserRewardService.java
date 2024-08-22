@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -32,9 +33,9 @@ public class UserRewardService {
         User user = userRepository.findByNickName(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        UserRewardSaveResponse response = null;
-
         List<UserRewardInfo> rewardInfos = request.getRewards();
+
+        UserReward lastReward = null;
 
         for (int i = 0; i < rewardInfos.size(); i++) {
 
@@ -42,15 +43,28 @@ public class UserRewardService {
 
             log.info("🍞 처리 중인 리워드 - 순서: {}, 리워드 이름: {}", i + 1, userRewardInfo.getName());
 
-            UserReward userReward = userRewardInfo.toEntity(user);
-            userRewardRepository.save(userReward);
+            UserReward existingUserReward = userRewardRepository.findByUserAndRewardName(user, lastReward.getRewardName())
+                    .orElseThrow(() -> new AppException(ErrorCode.REWARD_NOT_FOUND));
 
-            response = new UserRewardSaveResponse(userReward);
+            if (existingUserReward != null) {
+                // 기존 리워드가 있을 경우, 개수 업데이트
+                int updatedCount = existingUserReward.getRewardCount() + userRewardInfo.getCount();
+                existingUserReward.updateCount(updatedCount);
+                lastReward = userRewardRepository.save(existingUserReward);
+            } else {
+                // 기존 리워드가 없을 경우, 새 리워드 생성 및 저장
+                UserReward newUserReward = userRewardInfo.toEntity(user);
+                lastReward = userRewardRepository.save(newUserReward);
+            }
         }
+
+        // 응답 객체 생성
+        boolean isSaved = lastReward != null;
+        LocalDateTime saveTime = isSaved ? lastReward.getCreatedAt() : null;
 
         log.info("🍞 리워드 추가 완료");
 
-        return response;
+        return new UserRewardSaveResponse(isSaved, saveTime);
     }
 
 
