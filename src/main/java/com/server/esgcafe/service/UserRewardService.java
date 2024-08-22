@@ -44,7 +44,7 @@ public class UserRewardService {
             log.info("🍞 처리 중인 리워드 - 순서: {}, 리워드 이름: {}", i + 1, userRewardInfo.getName());
 
             UserReward existingUserReward = userRewardRepository.findByUserAndRewardName(user, userRewardInfo.getName())
-                    .orElseThrow(() -> new AppException(ErrorCode.REWARD_NOT_FOUND));
+                    .orElse(null);
 
             if (existingUserReward != null) {
                 // 기존 리워드가 있을 경우, 개수 업데이트
