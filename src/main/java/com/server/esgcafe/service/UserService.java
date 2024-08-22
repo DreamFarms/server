@@ -3,6 +3,8 @@ package com.server.esgcafe.service;
 import com.server.esgcafe.domain.dto.user.UserSaveRequest;
 import com.server.esgcafe.domain.dto.user.UserSaveResponse;
 import com.server.esgcafe.domain.entity.User;
+import com.server.esgcafe.exception.AppException;
+import com.server.esgcafe.exception.ErrorCode;
 import com.server.esgcafe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ public class UserService {
         if (request.getNickname().length() > 5) {
             String errorMessage = "닉네임은 5글자 이하여야 합니다.";
             log.error("🍞Validation failed: {}", errorMessage);
-            throw new IllegalArgumentException(errorMessage); // 적절한 예외를 던진다.
+            throw new AppException(ErrorCode.INVALID_NICKNAME_LENGTH);
         }
 
         Optional<User> existingUser = userRepository.findByNickName(request.getNickname());

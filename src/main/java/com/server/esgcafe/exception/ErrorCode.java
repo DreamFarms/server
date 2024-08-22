@@ -15,6 +15,7 @@ public enum ErrorCode {
     REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 재료가 존재하지 않습니다."),
     NOT_ENOUGH_BREAD(HttpStatus.NOT_FOUND, "보유한 빵의 개수가 충분하지 않습니다."),
     GAME_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게임이 존재하지 않습니다."),
+    INVALID_NICKNAME_LENGTH(HttpStatus.BAD_REQUEST, "닉네임은 5자 이하여야합니다."),
     ;
 
     private HttpStatus status;
