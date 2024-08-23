@@ -49,6 +49,10 @@ public class FoodService {
                     .findFirst()
                     .orElse(null);
 
+            log.info("🍞 검사 중인 재료 - 이름: {}, 필요한 개수: {}, 유저가 가진 개수: {}",
+                    ingredientName, requiredQuantity,
+                    userReward != null ? userReward.getRewardCount() : 0);
+
             if (userReward == null || userReward.getRewardCount() < requiredQuantity) {
 
                 FoodCheckResponse response = FoodCheckResponse.cannotMake("재료가 부족하여 빵을 만들 수 없습니다.");
