@@ -8,11 +8,11 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class FoodIngredient {
+public class Recipe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long foodIngredientNo;
+    private Long recipeNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "food_no", nullable = false)
