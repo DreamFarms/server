@@ -14,5 +14,4 @@ public class UserSaveResponse {
     public static UserSaveResponse from(User user, String message) {
         return new UserSaveResponse(user.getNickName(), message);
     }
-
 }

@@ -2,7 +2,6 @@ package com.server.esgcafe.domain.dto.user;
 
 import com.server.esgcafe.domain.entity.User;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -36,13 +36,13 @@ public class FoodService {
         Food food = foodRepository.findByName(request.getFoodName())
                 .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
 
-        List<FoodIngredient> foodIngredients = food.getFoodIngredients();
+        List<Recipe> recipe = food.getRecipes();
         List<UserReward> userRewards = userRewardRepository.findByUser(user);
 
-        for (FoodIngredient ingredient : foodIngredients) {
+        for (Recipe recipes : recipe) {
 
-            int requiredQuantity = ingredient.getQuantity();
-            String ingredientName = ingredient.getIngredient().getName();
+            int requiredQuantity = recipes.getQuantity();
+            String ingredientName = recipes.getIngredient().getName();
 
             UserReward userReward = userRewards.stream()
                     .filter(reward -> reward.getRewardName().equals(ingredientName))
@@ -62,7 +62,7 @@ public class FoodService {
             }
         }
 
-        List<FoodIngredientDTO> foodIngredientDTOs = foodIngredients.stream()
+        List<FoodIngredientDTO> foodIngredientDTOs = recipe.stream()
                 .map(fi -> new FoodIngredientDTO(fi.getIngredient().getName(), fi.getQuantity()))
                 .collect(Collectors.toList());
 
