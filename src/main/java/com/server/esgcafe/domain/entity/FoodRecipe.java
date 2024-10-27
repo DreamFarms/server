@@ -3,12 +3,15 @@ package com.server.esgcafe.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Recipe {
+public class FoodRecipe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +22,8 @@ public class Recipe {
     private Food food;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ingredient_no", nullable = false)
+    @JoinColumn(name = "ingredient_no")
     private Ingredient ingredient;
 
-    @Column(nullable = false)
-    private int quantity;  // 해당 음식을 만들기 위해 필요한 재료 수량
+    private int quantity;
 }

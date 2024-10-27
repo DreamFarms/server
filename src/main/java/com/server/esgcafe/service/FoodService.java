@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,35 +37,35 @@ public class FoodService {
         Food food = foodRepository.findByName(request.getFoodName())
                 .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
 
-        List<Recipe> recipe = food.getRecipes();
         List<UserReward> userRewards = userRewardRepository.findByUser(user);
+        List<FoodIngredientDTO> foodIngredientDTOs = new ArrayList<>();
 
-        for (Recipe recipes : recipe) {
+        // 음식의 모든 레시피를 확인
+        for (FoodRecipe recipe : food.getRecipes()) {
+                // RecipeIngredient에서 ingredient와 quantity 정보 확인
+                Ingredient ingredient = recipe.getIngredient(); // Ingredient 객체 가져오기
+                int requiredQuantity = recipe.getQuantity(); // 필요한 수량
+                String ingredientName = ingredient.getName(); // 재료 이름
 
-            int requiredQuantity = recipes.getQuantity();
-            String ingredientName = recipes.getIngredient().getName();
+                UserReward userReward = userRewards.stream()
+                        .filter(reward -> reward.getRewardName().equals(ingredientName))
+                        .findFirst()
+                        .orElse(null);
 
-            UserReward userReward = userRewards.stream()
-                    .filter(reward -> reward.getRewardName().equals(ingredientName))
-                    .findFirst()
-                    .orElse(null);
+                log.info("🍞 검사 중인 재료 - 이름: {}, 필요한 개수: {}, 유저가 가진 개수: {}",
+                        ingredientName, requiredQuantity,
+                        userReward != null ? userReward.getRewardCount() : 0);
 
-            log.info("🍞 검사 중인 재료 - 이름: {}, 필요한 개수: {}, 유저가 가진 개수: {}",
-                    ingredientName, requiredQuantity,
-                    userReward != null ? userReward.getRewardCount() : 0);
+                if (userReward == null || userReward.getRewardCount() < requiredQuantity) {
+                    FoodCheckResponse response = FoodCheckResponse.cannotMake("재료가 부족하여 빵을 만들 수 없습니다.");
+                    log.info("🍞checkUserCanMakeFood 실패 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
 
-            if (userReward == null || userReward.getRewardCount() < requiredQuantity) {
+                    return response;
+                }
 
-                FoodCheckResponse response = FoodCheckResponse.cannotMake("재료가 부족하여 빵을 만들 수 없습니다.");
-                log.info("🍞checkUserCanMakeFood 실패 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
-
-                return response;
+                // 필요한 재료 DTO 추가
+                foodIngredientDTOs.add(new FoodIngredientDTO(ingredientName, requiredQuantity));
             }
-        }
-
-        List<FoodIngredientDTO> foodIngredientDTOs = recipe.stream()
-                .map(fi -> new FoodIngredientDTO(fi.getIngredient().getName(), fi.getQuantity()))
-                .collect(Collectors.toList());
 
         List<UserRewardDTO> userRewardDTOs = userRewards.stream()
                 .map(ur -> new UserRewardDTO(ur.getRewardName(), ur.getRewardCount()))
