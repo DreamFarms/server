@@ -19,8 +19,7 @@ public class UserUnlockedRecipe extends BaseEntity{
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_no", nullable = false)
-    private Recipe recipe;
-
+    @JoinColumn(name = "food_no")
+    private Food food;
 
 }

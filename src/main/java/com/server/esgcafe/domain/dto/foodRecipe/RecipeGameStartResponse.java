@@ -1,4 +1,4 @@
-package com.server.esgcafe.domain.dto.recipe;
+package com.server.esgcafe.domain.dto.foodRecipe;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
