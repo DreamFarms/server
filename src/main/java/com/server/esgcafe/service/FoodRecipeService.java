@@ -29,6 +29,8 @@ public class FoodRecipeService {
     @Transactional(readOnly = true)
     public RecipeGameStartResponse startRecipeGame(String nickname) {
 
+        log.info("🍞Start recipe game start");
+
         User user = userRepository.findByNickName(nickname)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -47,17 +49,31 @@ public class FoodRecipeService {
                 .map(unlocked -> new UnlockedRecipeInfo(unlocked.getFood().getName()))
                 .collect(Collectors.toList());
 
+        log.info("🍞 End recipe game start");
+
         // 보유 재료와 해금된 레시피 정보를 담아서 반환
         return new RecipeGameStartResponse(ingredientInfos, recipeInfos);
     }
 
     @Transactional
     public RecipeGuessResponse checkUserRecipe(UserRecipeGuessRequest request) {
+
+        log.info("🍞 Check user recipe guess Start");
+
+        log.info("🍞 Request received: {}", request);
+
         User user = userRepository.findByNickName(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // 유저가 제출한 재료와 수량
         List<IngredientQuantity> userIngredients = request.getIngredients();
+
+        // userIngredients가 null인지 확인
+        if (userIngredients == null || userIngredients.isEmpty()) {
+            throw new AppException(ErrorCode.MISSING_INGREDIENTS, "사용자가 제출한 재료 목록이 없습니다.");
+        }
+
+        log.info("🍞 User submitted ingredients: {}", userIngredients);
 
         // 모든 음식(레시피) 가져오기
         List<Food> allFoods = foodRepository.findAll();
@@ -70,24 +86,40 @@ public class FoodRecipeService {
             // 해당 음식에 필요한 재료 목록 가져오기
             List<FoodRecipe> requiredIngredients = food.getRecipes();
 
+            // 현재 확인 중인 음식과 필요한 재료 목록을 로그로 출력
+            log.info("🍞 Checking recipe for food: {} with required ingredients: {}", food.getName(), requiredIngredients);
+
             // 재료 비교 로직
-            boolean allIngredientsMatch = requiredIngredients.stream().allMatch(required ->
-                    userIngredients.stream().anyMatch(userIngredient ->
-                            userIngredient.getIngredientName().equals(required.getIngredient().getName()) &&
-                                    userIngredient.getQuantity() >= required.getQuantity()
-                    )
-            );
+            // 재료 비교 로직
+            boolean allIngredientsMatch = requiredIngredients.size() == userIngredients.size() &&
+                    requiredIngredients.stream().allMatch(required -> {
+                        boolean ingredientMatch = userIngredients.stream().anyMatch(userIngredient ->
+                                userIngredient.getIngredientName().equals(required.getIngredient().getName()) &&
+                                        userIngredient.getQuantity() == required.getQuantity()  // 정확한 수량 일치 확인
+                        );
+
+                        // 각 재료의 비교 결과를 로그로 출력
+                        log.info("🍞 Comparing required ingredient: {} - Match found: {}", required, ingredientMatch);
+                        return ingredientMatch;
+                    });
+
 
             if (allIngredientsMatch) {
                 result = true;
                 breadName = food.getName();
 
-                // 해금된 레시피 저장
+                // 해금된 레시피 저장하고 로그로 출력
                 userUnlockedRecipeService.saveUnlockedRecipe(user, food);
+                log.info("🍞 Recipe matched and unlocked for food: {}", breadName);
                 break;
+            } else {
+                log.info("🍞 Recipe did not match for food: {}", food.getName());
             }
         }
 
+        log.info("🍞 Check user recipe guess End - Result: {}, Bread Name: {}", result, breadName);
+
         return new RecipeGuessResponse(result, breadName);
     }
+
 }
