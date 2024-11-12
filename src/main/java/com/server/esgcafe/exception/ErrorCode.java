@@ -17,7 +17,9 @@ public enum ErrorCode {
     GAME_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 게임이 존재하지 않습니다."),
     INVALID_NICKNAME_LENGTH(HttpStatus.BAD_REQUEST, "닉네임은 5자 이하여야합니다."),
     MISSING_INGREDIENTS(HttpStatus.NOT_FOUND, "사용자가 제출한 재료 목록이 없습니다."),
-    INVALID_INVENTORY_ITEM(HttpStatus.BAD_REQUEST, "인벤토리 저장 방식이 잘못되었습니다.")
+    INVALID_INVENTORY_ITEM(HttpStatus.BAD_REQUEST, "인벤토리 저장 방식이 잘못되었습니다."),
+    INGREDIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 재료를 찾을 수 없습니다."),
+    INSUFFICIENT_INGREDIENTS(HttpStatus.BAD_REQUEST, "재료가 부족합니다.")
     ;
 
     private HttpStatus status;

@@ -2,7 +2,7 @@ package com.server.esgcafe.controller;
 
 import com.server.esgcafe.domain.dto.user.UserSaveRequest;
 import com.server.esgcafe.domain.dto.user.UserSaveResponse;
-import com.server.esgcafe.domain.dto.userBread.UserBreadInfoResponse;
+import com.server.esgcafe.domain.dto.userInventory.UserInventoryInfoResponse;
 import com.server.esgcafe.exception.Response;
 import com.server.esgcafe.service.UserService;
 import jakarta.validation.Valid;
@@ -24,9 +24,9 @@ public class UserController {
     }
 
     @GetMapping("/bread-info")
-    public Response<UserBreadInfoResponse> getBreadInfo(@RequestParam String nickname) {
+    public Response<UserInventoryInfoResponse> getBreadInfo(@RequestParam String nickname) {
 
-        UserBreadInfoResponse response = userService.userBreadInfo(nickname);
+        UserInventoryInfoResponse response = userService.userBreadInfo(nickname);
         return Response.success(response);
     }
 }

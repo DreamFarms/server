@@ -4,6 +4,25 @@ values
     (2, 'bake bread'),
     (3, 'match card');
 
+-- Insert ingredients
+INSERT INTO esgcafe.ingredient (name, code) VALUES
+                                          ('Flour', 2000),
+                                          ('Flour_Green', 2001),
+                                          ('Flour_Red', 2002),
+                                          ('Salt', 2003),
+                                          ('Sugar', 2004),
+                                          ('Butter', 2005),
+                                          ('Egg', 2006),
+                                          ('Milk', 2007),
+                                          ('Apple', 2008),
+                                          ('Banana', 2009),
+                                          ('Blueberry', 2010),
+                                          ('Peach', 2011),
+                                          ('Strawberry', 2012),
+                                          ('Chocolate', 2013),
+                                          ('MelonSyrup', 2014),
+                                          ('Vanilla', 2015);
+
 -- Insert foods
 INSERT INTO esgcafe.food (name, code) VALUES
                             ('Sandwich', 1000),
