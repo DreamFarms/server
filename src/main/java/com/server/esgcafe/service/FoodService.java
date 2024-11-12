@@ -2,17 +2,16 @@ package com.server.esgcafe.service;
 
 import com.server.esgcafe.domain.dto.food.*;
 import com.server.esgcafe.domain.entity.*;
+import com.server.esgcafe.domain.enum_class.ItemType;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
-import com.server.esgcafe.repository.FoodRepository;
-import com.server.esgcafe.repository.UserBreadRepository;
-import com.server.esgcafe.repository.UserRepository;
-import com.server.esgcafe.repository.UserRewardRepository;
+import com.server.esgcafe.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,12 +23,11 @@ public class FoodService {
 
     private final FoodRepository foodRepository;
     private final UserRepository userRepository;
-    private final UserRewardRepository userRewardRepository;
-    private final UserBreadRepository userBreadRepository;
+    private final UserInventoryRepository userInventoryRepository;
 
     public FoodCheckResponse checkUserCanMakeFood(FoodCheckRequest request) {
 
-        log.info("🍞checkUserCanMakeFood 시작 - 닉네임: {}, 음식 이름: {}", request.getNickname(), request.getFoodName());
+        log.info("🍞 checkUserCanMakeFood 시작 - 닉네임: {}, 음식 이름: {}", request.getNickname(), request.getFoodName());
 
         User user = userRepository.findByNickName(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -37,44 +35,46 @@ public class FoodService {
         Food food = foodRepository.findByName(request.getFoodName())
                 .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
 
-        List<UserReward> userRewards = userRewardRepository.findByUser(user);
+        List<UserInventory> userInventories = userInventoryRepository.findByUser(user);
         List<FoodIngredientDTO> foodIngredientDTOs = new ArrayList<>();
 
         // 음식의 모든 레시피를 확인
         for (FoodRecipe recipe : food.getRecipes()) {
-                // RecipeIngredient에서 ingredient와 quantity 정보 확인
-                Ingredient ingredient = recipe.getIngredient(); // Ingredient 객체 가져오기
-                int requiredQuantity = recipe.getQuantity(); // 필요한 수량
-                String ingredientName = ingredient.getName(); // 재료 이름
+            Ingredient ingredient = recipe.getIngredient();
+            int requiredQuantity = recipe.getQuantity();
+            String ingredientName = ingredient.getName();
 
-                UserReward userReward = userRewards.stream()
-                        .filter(reward -> reward.getRewardName().equals(ingredientName))
-                        .findFirst()
-                        .orElse(null);
+            // RemainingIngredient에 맞춰 비교하는 부분
+            UserInventory userInventory = userInventories.stream()
+                    .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT &&
+                            inventory.getFoodOrIngredientNo().equals(ingredient.getIngredientNo())) // ingredientNo로 비교
+                    .findFirst()
+                    .orElse(null);
 
-                log.info("🍞 검사 중인 재료 - 이름: {}, 필요한 개수: {}, 유저가 가진 개수: {}",
-                        ingredientName, requiredQuantity,
-                        userReward != null ? userReward.getRewardCount() : 0);
+            log.info("🍞 검사 중인 재료 - 이름: {}, 필요한 개수: {}, 유저가 가진 개수: {}",
+                    ingredientName, requiredQuantity,
+                    userInventory != null ? userInventory.getCount() : 0);
 
-                if (userReward == null || userReward.getRewardCount() < requiredQuantity) {
-                    FoodCheckResponse response = FoodCheckResponse.cannotMake("재료가 부족하여 빵을 만들 수 없습니다.");
-                    log.info("🍞checkUserCanMakeFood 실패 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
+            if (userInventory == null || userInventory.getCount() < requiredQuantity) {
+                FoodCheckResponse response = FoodCheckResponse.cannotMake("재료가 부족하여 빵을 만들 수 없습니다.");
+                log.info("🍞 checkUserCanMakeFood 실패 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
 
-                    return response;
-                }
-
-                // 필요한 재료 DTO 추가
-                foodIngredientDTOs.add(new FoodIngredientDTO(ingredientName, requiredQuantity));
+                return response;
             }
 
-        List<UserRewardDTO> userRewardDTOs = userRewards.stream()
-                .map(ur -> new UserRewardDTO(ur.getRewardName(), ur.getRewardCount()))
+            // 필요한 재료 DTO 추가
+            foodIngredientDTOs.add(new FoodIngredientDTO(ingredientName, requiredQuantity));
+        }
+
+        List<UserRewardDTO> userRewardDTOs = userInventories.stream()
+                .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT)
+                .map(inventory -> new UserRewardDTO(inventory.getFoodOrIngredientNo().toString(), inventory.getCount()))
                 .collect(Collectors.toList());
 
         FoodCheckResponse response = FoodCheckResponse.canMake("빵을 만들 수 있습니다.", foodIngredientDTOs, userRewardDTOs);
-        log.info("🍞checkUserCanMakeFood 성공 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
-        log.info("🍞필요한 재료: {}", foodIngredientDTOs);
-        log.info("🍞유저 보유 재료: {}", userRewardDTOs);
+        log.info("🍞 checkUserCanMakeFood 성공 - 닉네임: {}, 메시지: {}", request.getNickname(), response.getMessage());
+        log.info("🍞 필요한 재료: {}", foodIngredientDTOs);
+        log.info("🍞 유저 보유 재료: {}", userRewardDTOs);
 
         return response;
     }
@@ -82,11 +82,7 @@ public class FoodService {
     @Transactional
     public FoodUpdateResponse updateUserRewardsAndBread(FoodUpdateRequest request) {
 
-        log.info("🍞 userBread 저장 및 리워드 차감 시작");
-
-        log.info("🍞 request.getnickname: {}", request.getNickname());
-        log.info("🍞 request.getFoodName: {}", request.getFoodName());
-        log.info("🍞 request.getBreadCount: {}", request.getBreadCount());
+        log.info("🍞 userInventory 업데이트 및 리워드 차감 시작");
 
         User user = userRepository.findByNickName(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -94,42 +90,47 @@ public class FoodService {
         Food food = foodRepository.findByName(request.getFoodName())
                 .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
 
-        // 유저의 보유 빵 개수 업데이트
-        UserBread existingUserBread = userBreadRepository.findByUserAndFood(user, food).orElse(null);
-
-        UserBread userBread;
+        List<UserInventory> userInventories = userInventoryRepository.findByUser(user);
 
         try {
-            if (existingUserBread == null) {
-                // 빵이 없는 경우: 새로운 UserBread 객체 생성
-                userBread = request.toEntity(user, food, 0);
-            } else {
-                // 빵이 있는 경우: 개수만 업데이트
-                userBread = UserBread.update(existingUserBread, request.getBreadCount());
+            // RemainingIngredient 리스트에서 재료 차감
+            for (RemainingIngredient remainingIngredient : request.getRemainingIngredients()) {
+                String ingredientName = remainingIngredient.getIngredientName();
+                int remainingQuantity = remainingIngredient.getRemainingQuantity();
+
+                // 재료의 ingredientNo를 찾아서 비교
+                Ingredient ingredient = food.getRecipes().stream()
+                        .filter(recipe -> recipe.getIngredient().getName().equals(ingredientName))
+                        .map(FoodRecipe::getIngredient)
+                        .findFirst()
+                        .orElseThrow(() -> new AppException(ErrorCode.INGREDIENT_NOT_FOUND));
+
+                UserInventory userInventory = userInventories.stream()
+                        .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT &&
+                                inventory.getFoodOrIngredientNo().equals(ingredient.getIngredientNo())) // ingredientNo로 비교
+                        .findFirst()
+                        .orElseThrow(() -> new AppException(ErrorCode.INSUFFICIENT_INGREDIENTS));
+
+                // 재료 수량 차감
+                if (userInventory.getCount() < remainingQuantity) {
+                    throw new AppException(ErrorCode.INSUFFICIENT_INGREDIENTS);
+                }
+
+                userInventory.updateCount(userInventory.getCount() - remainingQuantity);
+                userInventoryRepository.save(userInventory);
             }
 
-            userBreadRepository.save(userBread);
+            log.info("🍞 userInventory 업데이트 성공");
+
         } catch (Exception e) {
-            // 빵 저장 중 오류 발생 시, 리워드 차감도 롤백되도록 설정
-            throw new RuntimeException("🍞Failed to save bread", e);
+            // 예외 발생 시 롤백
+            throw new RuntimeException("🍞 Failed to update user inventory", e);
         }
 
-        for(RemainingIngredient ingredient : request.getRemainingIngredients()) {
+        // FoodUpdateResponse 생성
+        FoodUpdateResponse response = new FoodUpdateResponse(true, LocalDateTime.now());
+        log.info("🍞 userInventory 업데이트 및 리워드 차감 성공");
 
-            String ingredientName = ingredient.getIngredientName();
-            int remainingQuantity = ingredient.getRemainingQuantity();
-
-            log.info("🍞 차감된 재료 정보 - 이름 : {}, 남은 개수 : {}", ingredientName, remainingQuantity);
-
-            UserReward userReward = userRewardRepository.findByUserAndRewardName(user, ingredientName)
-                    .orElseThrow(() -> new AppException(ErrorCode.REWARD_NOT_FOUND));
-
-            // 새로운 UserReward 객체 생성
-            UserReward updatedUserReward = userReward.withUpdatedRewardCount(remainingQuantity);
-            userRewardRepository.save(updatedUserReward);
-
-        }
-
-        return new FoodUpdateResponse(userBread);
+        return response;
     }
 }

@@ -1,5 +1,6 @@
 package com.server.esgcafe.domain.entity;
 
+import com.server.esgcafe.domain.enum_class.ItemType;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
 import jakarta.persistence.*;
@@ -10,7 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class UserInventory {
+public class UserInventory extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,19 +21,29 @@ public class UserInventory {
     @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "food_no", nullable = false)
-    private Food food;
+    private Long foodOrIngredientNo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ingredient_no", nullable = false)
-    private Ingredient ingredient;
+    @Enumerated(EnumType.STRING)
+    private ItemType itemType;
 
     private int count;
 
+    public void updateCount(int count) {
+        this.count = count;
+    }
+
+    // 재고 차감
+    public void subtractInventoryCount(int soldCount) {
+        if (this.count < soldCount) {
+            throw new AppException(ErrorCode.NOT_ENOUGH_BREAD);
+        }
+        this.count -= soldCount;
+    }
+
+
     @PrePersist
     public void validate() {
-        if ((food == null && ingredient == null) || (food != null && ingredient != null)) {
+        if (foodOrIngredientNo == null || itemType == null) {
             throw new AppException(ErrorCode.INVALID_INVENTORY_ITEM);
         }
     }

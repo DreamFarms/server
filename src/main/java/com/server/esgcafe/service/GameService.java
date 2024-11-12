@@ -3,16 +3,11 @@ package com.server.esgcafe.service;
 import com.server.esgcafe.domain.dto.game.GameResultRequest;
 import com.server.esgcafe.domain.dto.game.GameResultResponse;
 import com.server.esgcafe.domain.dto.game.SoldBreadRequest;
-import com.server.esgcafe.domain.entity.Food;
-import com.server.esgcafe.domain.entity.Game;
-import com.server.esgcafe.domain.entity.User;
-import com.server.esgcafe.domain.entity.UserBread;
+import com.server.esgcafe.domain.entity.*;
+import com.server.esgcafe.domain.enum_class.ItemType;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
-import com.server.esgcafe.repository.FoodRepository;
-import com.server.esgcafe.repository.GameRepository;
-import com.server.esgcafe.repository.UserBreadRepository;
-import com.server.esgcafe.repository.UserRepository;
+import com.server.esgcafe.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +21,7 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final FoodRepository foodRepository;
-    private final UserBreadRepository userBreadRepository;
+    private final UserInventoryRepository userInventoryRepository;
 
 
     @Transactional
@@ -44,17 +39,17 @@ public class GameService {
         // 판매된 빵 처리
         for (SoldBreadRequest soldBread : request.getSoldBreads()) {
             Food food = soldBread.getFood(foodRepository);
-            UserBread userBread = userBreadRepository.findByUserAndFood(user, food)
+
+            // UserInventory에서 Food 아이템을 조회
+            UserInventory userInventory = userInventoryRepository.findByUserAndFoodOrIngredientNoAndItemType(user, food.getFoodNo(), ItemType.FOOD)
                     .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
 
-            userBread.subtractBreadCount(soldBread.getSoldCount());  // 빵 개수 차감
-            userBreadRepository.save(userBread);
+            // 빵 개수 차감
+            userInventory.subtractInventoryCount(soldBread.getSoldCount());
+            userInventoryRepository.save(userInventory);
         }
 
         return new GameResultResponse(savedGame);
     }
-
-
-
 
 }

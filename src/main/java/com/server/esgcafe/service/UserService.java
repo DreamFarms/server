@@ -2,13 +2,16 @@ package com.server.esgcafe.service;
 
 import com.server.esgcafe.domain.dto.user.UserSaveRequest;
 import com.server.esgcafe.domain.dto.user.UserSaveResponse;
-import com.server.esgcafe.domain.dto.userBread.BreadInfo;
-import com.server.esgcafe.domain.dto.userBread.UserBreadInfoResponse;
+import com.server.esgcafe.domain.dto.userInventory.BreadInfo;
+import com.server.esgcafe.domain.dto.userInventory.UserInventoryInfoResponse;
+import com.server.esgcafe.domain.entity.Food;
 import com.server.esgcafe.domain.entity.User;
-import com.server.esgcafe.domain.entity.UserBread;
+import com.server.esgcafe.domain.entity.UserInventory;
+import com.server.esgcafe.domain.enum_class.ItemType;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
-import com.server.esgcafe.repository.UserBreadRepository;
+import com.server.esgcafe.repository.FoodRepository;
+import com.server.esgcafe.repository.UserInventoryRepository;
 import com.server.esgcafe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +28,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserBreadRepository userBreadRepository;
+    private final FoodRepository foodRepository;
+    private final UserInventoryRepository userInventoryRepository;
 
     public UserSaveResponse processUser(UserSaveRequest request) {
 
@@ -65,7 +69,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserBreadInfoResponse userBreadInfo(String nickname) {
+    public UserInventoryInfoResponse userBreadInfo(String nickname) {
 
         log.info("🍞nickname : {}", nickname);
 
@@ -74,17 +78,24 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // 유저의 빵 리스트 조회
-        List<UserBread> userBreads = userBreadRepository.findByUser(user);
+        List<UserInventory> userInventories = userInventoryRepository.findByUserAndItemType(user, ItemType.FOOD);
 
         // 빵 리스트와 개수 추출
-        List<BreadInfo> breadInfoList = userBreads.stream()
+        List<BreadInfo> breadInfoList = userInventories.stream()
                 .collect(Collectors.groupingBy(
-                        bread -> bread.getFood().getName(),  // 빵의 이름
-                        Collectors.summingInt(UserBread::getBreadCount)  // 개수 합산
+                        UserInventory::getFoodOrIngredientNo,  // foodOrIngredientNo로 그룹화
+                        Collectors.summingInt(UserInventory::getCount)  // 개수 합산
                 ))
                 .entrySet().stream()
-                .map(entry -> new BreadInfo(entry.getKey(), entry.getValue()))
+                .map(entry -> {
+                    // foodOrIngredientNo로 Food 이름을 조회
+                    Long foodId = entry.getKey();
+                    Food food = foodRepository.findById(foodId)
+                            .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+                    return new BreadInfo(food.getName(), entry.getValue());
+                })
                 .collect(Collectors.toList());
+
 
         // 빵 리스트 로그 출력
         for (BreadInfo breadInfo : breadInfoList) {
@@ -92,6 +103,6 @@ public class UserService {
         }
 
         // 응답 객체 생성
-        return new UserBreadInfoResponse(breadInfoList);
+        return new UserInventoryInfoResponse(breadInfoList);
     }
 }

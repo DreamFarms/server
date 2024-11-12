@@ -2,6 +2,7 @@ package com.server.esgcafe.service;
 
 import com.server.esgcafe.domain.dto.foodRecipe.*;
 import com.server.esgcafe.domain.entity.*;
+import com.server.esgcafe.domain.enum_class.ItemType;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
 import com.server.esgcafe.repository.*;
@@ -19,10 +20,10 @@ import java.util.stream.Collectors;
 public class FoodRecipeService {
 
     private final UserRepository userRepository;
-    private final UserRewardRepository userRewardRepository;
     private final UserUnlockedRecipeRepository userUnlockedRecipeRepository;
     private final FoodRecipeRepository recipeRepository;
     private final FoodRepository foodRepository;
+    private final UserInventoryRepository userInventoryRepository;
 
     private final UserUnlockedRecipeService userUnlockedRecipeService;
 
@@ -35,14 +36,16 @@ public class FoodRecipeService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // 유저의 보유 재료 정보 가져오기
-        List<UserReward> userRewards = userRewardRepository.findByUser(user);
+        List<UserInventory> userInventories = userInventoryRepository.findByUser(user);
+
 
         // 유저가 해금한 레시피 정보 가져오기
         List<UserUnlockedRecipe> unlockedRecipes = userUnlockedRecipeRepository.findByUser(user);
 
         // 응답 DTO로 변환
-        List<IngredientInfo> ingredientInfos = userRewards.stream()
-                .map(reward -> new IngredientInfo(reward.getRewardName(), reward.getRewardCount()))
+        List<IngredientInfo> ingredientInfos = userInventories.stream()
+                .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT)  // 필터링
+                .map(inventory -> new IngredientInfo(inventory.getFoodOrIngredientNo().toString(), inventory.getCount()))
                 .collect(Collectors.toList());
 
         List<UnlockedRecipeInfo> recipeInfos = unlockedRecipes.stream()
