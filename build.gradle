@@ -41,6 +41,16 @@ dependencies {
     // validation
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.5.6'
 
+    // Google login
+    implementation group: 'com.google.api-client', name: 'google-api-client', version: '2.7.0'
+    implementation group: 'com.google.http-client', name: 'google-http-client', version: '1.45.0'
+    implementation 'com.google.http-client:google-http-client-gson:1.43.3'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
 }
 
 task copyPrivate(type: Copy) {
