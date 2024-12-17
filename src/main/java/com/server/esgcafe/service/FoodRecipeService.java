@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +25,7 @@ public class FoodRecipeService {
     private final FoodRecipeRepository recipeRepository;
     private final FoodRepository foodRepository;
     private final UserInventoryRepository userInventoryRepository;
+    private final IngredientRepository ingredientRepository;
 
     private final UserUnlockedRecipeService userUnlockedRecipeService;
 
@@ -38,18 +40,26 @@ public class FoodRecipeService {
         // 유저의 보유 재료 정보 가져오기
         List<UserInventory> userInventories = userInventoryRepository.findByUser(user);
 
+        // 모든 재료 정보 가져오기 (재료 번호를 이름과 매핑하기 위함)
+        Map<Long, String> ingredientNameMap = ingredientRepository.findAll().stream()
+                .collect(Collectors.toMap(Ingredient::getIngredientNo, Ingredient::getName));
 
         // 유저가 해금한 레시피 정보 가져오기
-        List<UserUnlockedRecipe> unlockedRecipes = userUnlockedRecipeRepository.findByUser(user);
+        List<UserUnlockedRecipe> unlockedRecipes = userUnlockedRecipeRepository.findByUserWithFood(user);
 
         // 응답 DTO로 변환
         List<IngredientInfo> ingredientInfos = userInventories.stream()
-                .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT)  // 필터링
-                .map(inventory -> new IngredientInfo(inventory.getFoodOrIngredientNo().toString(), inventory.getCount()))
+                .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT) // 필터링
+                .map(inventory -> new IngredientInfo(
+                        ingredientNameMap.get(inventory.getFoodOrIngredientNo()), // 이름 매핑
+                        inventory.getCount()
+                ))
                 .collect(Collectors.toList());
 
         List<UnlockedRecipeInfo> recipeInfos = unlockedRecipes.stream()
-                .map(unlocked -> new UnlockedRecipeInfo(unlocked.getFood().getName()))
+                .map(unlocked -> new UnlockedRecipeInfo(
+                        unlocked.getFood() != null ? unlocked.getFood().getName() : "Unknown"
+                ))
                 .collect(Collectors.toList());
 
         log.info("🍞 End recipe game start");
@@ -93,19 +103,18 @@ public class FoodRecipeService {
             log.info("🍞 Checking recipe for food: {} with required ingredients: {}", food.getName(), requiredIngredients);
 
             // 재료 비교 로직
-            // 재료 비교 로직
             boolean allIngredientsMatch = requiredIngredients.size() == userIngredients.size() &&
                     requiredIngredients.stream().allMatch(required -> {
-                        boolean ingredientMatch = userIngredients.stream().anyMatch(userIngredient ->
-                                userIngredient.getIngredientName().equals(required.getIngredient().getName()) &&
-                                        userIngredient.getQuantity() == required.getQuantity()  // 정확한 수량 일치 확인
-                        );
+                        boolean ingredientMatch = userIngredients.stream().anyMatch(userIngredient -> {
+                            boolean nameMatch = userIngredient.getIngredientName()
+                                    .equals(required.getIngredient().getName());
+                            boolean quantityMatch = userIngredient.getQuantity() == required.getQuantity();
 
-                        // 각 재료의 비교 결과를 로그로 출력
-                        log.info("🍞 Comparing required ingredient: {} - Match found: {}", required, ingredientMatch);
+                            return nameMatch && quantityMatch;
+                        });
+
                         return ingredientMatch;
                     });
-
 
             if (allIngredientsMatch) {
                 result = true;
