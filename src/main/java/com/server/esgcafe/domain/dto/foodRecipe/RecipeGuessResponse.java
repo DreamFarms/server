@@ -5,10 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class RecipeGuessResponse {
 
-    private boolean result; // 성공 여부
+    private int resultState; // 성공 여부
     private String breadName; // 빵 이름(성공 시)
 }

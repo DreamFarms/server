@@ -91,8 +91,31 @@ public class FoodRecipeService {
         // 모든 음식(레시피) 가져오기
         List<Food> allFoods = foodRepository.findAll();
 
-        boolean result = false;
+        int resultState = 0;
         String breadName = null;
+
+        // 인벤토리에서 재료 차감 (모든 경우)
+        for (IngredientQuantity userIngredient : userIngredients) {
+            String ingredientName = userIngredient.getIngredientName();
+            int requiredQuantity = userIngredient.getQuantity();
+
+            Ingredient ingredient = ingredientRepository.findByName(ingredientName)
+                    .orElseThrow(() -> new AppException(ErrorCode.INGREDIENT_NOT_FOUND));
+
+            UserInventory userInventory = userInventoryRepository.findByUserAndFoodOrIngredientNoAndItemType(
+                            user, ingredient.getIngredientNo(), ItemType.INGREDIENT)
+                    .orElseThrow(() -> new AppException(ErrorCode.INGREDIENT_NOT_FOUND));
+
+            // 인벤토리에 재료가 충분한지 확인
+            if (userInventory.getCount() < requiredQuantity) {
+                throw new AppException(ErrorCode.INSUFFICIENT_INGREDIENTS,
+                        String.format("재료가 부족합니다. 필요: %d, 보유: %d", requiredQuantity, userInventory.getCount()));
+            }
+
+            // 차감
+            userInventory.subtractInventoryCount(requiredQuantity);
+            userInventoryRepository.save(userInventory);
+        }
 
         // 모든 음식의 레시피 확인
         for (Food food : allFoods) {
@@ -104,21 +127,29 @@ public class FoodRecipeService {
 
             // 재료 비교 로직
             boolean allIngredientsMatch = requiredIngredients.size() == userIngredients.size() &&
-                    requiredIngredients.stream().allMatch(required -> {
-                        boolean ingredientMatch = userIngredients.stream().anyMatch(userIngredient -> {
-                            boolean nameMatch = userIngredient.getIngredientName()
-                                    .equals(required.getIngredient().getName());
-                            boolean quantityMatch = userIngredient.getQuantity() == required.getQuantity();
-
-                            return nameMatch && quantityMatch;
-                        });
-
-                        return ingredientMatch;
-                    });
+                    requiredIngredients.stream().allMatch(required ->
+                            userIngredients.stream().anyMatch(userIngredient ->
+                                    userIngredient.getIngredientName().equals(required.getIngredient().getName()) &&
+                                            userIngredient.getQuantity() == required.getQuantity()
+                            )
+                    );
 
             if (allIngredientsMatch) {
-                result = true;
+                // 이미 해금된 레시피인지 확인
+                boolean alreadyUnlocked = userUnlockedRecipeRepository.existsByUserAndFood(user, food);
+                if (alreadyUnlocked) {
+                    log.info("🍞 Already unlocked recipe : {}", food.getName());
+
+                    RecipeGuessResponse response = new RecipeGuessResponse(-1, food.getName());
+                    log.info("🍞 Final Response Object: {}", response);
+                    return response;
+
+//                    return new RecipeGuessResponse(null, food.getName());
+                }
+
+                // 레시피 해금
                 breadName = food.getName();
+                resultState = 1;
 
                 // 해금된 레시피 저장하고 로그로 출력
                 userUnlockedRecipeService.saveUnlockedRecipe(user, food);
@@ -129,9 +160,9 @@ public class FoodRecipeService {
             }
         }
 
-        log.info("🍞 Check user recipe guess End - Result: {}, Bread Name: {}", result, breadName);
+        log.info("🍞 Check user recipe guess End - Bread Name: {}", breadName);
 
-        return new RecipeGuessResponse(result, breadName);
+        return new RecipeGuessResponse(resultState, breadName);
     }
 
 }
