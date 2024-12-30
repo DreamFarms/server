@@ -24,18 +24,19 @@ INSERT INTO esgcafe.ingredient (name, code) VALUES
                                           ('Vanilla', 2015);
 
 -- Insert foods
-INSERT INTO esgcafe.food (name, code) VALUES
-                            ('Sandwich', 1000),
-                            ('Icebox_Strawberry', 1001),
-                            ('Donut_Chocolate', 1002),
-                            ('ButterBar_Plane', 1003),
-                            ('RollCake_Chocolate', 1004),
-                            ('RollCake_Strawberry', 1005),
-                            ('ButterRoll_Salted', 1006),
-                            ('Bread_Melon', 1007),
-                            ('Cake_Strawberry', 1008),
-                            ('Cookie_Strawberry', 1009),
-                            ('DinnerRoll', 1010);
+INSERT INTO esgcafe.food (name, code, category) VALUES
+                            ('Sandwich', 1000, 'bread'),
+                            ('Icebox_Strawberry', 1001, 'dessert'),
+                            ('Donut_Chocolate', 1002, 'dessert'),
+                            ('ButterBar_Plane', 1003, 'dessert'),
+                            ('RollCake_Chocolate', 1004, 'dessert'),
+                            ('RollCake_Strawberry', 1005, 'dessert'),
+                            ('ButterRoll_Salted', 1006, 'bread'),
+                            ('Bread_Melon', 1007, 'bread'),
+                            ('Cake_Strawberry', 1008, 'dessert'),
+                            ('Cookie_Strawberry', 1009, 'dessert'),
+                            ('DinnerRoll', 1010, 'bread'),
+                            ('Apple_Pie', 1011, 'dessert');
 
 -- Insert food_recipe
 -- Sandwich
@@ -132,4 +133,12 @@ INSERT INTO esgcafe.food_recipe (food_no, ingredient_no, quantity) VALUES
                                                                (11, 7, 1),  -- Egg
                                                                (11, 8, 1);  -- Milk
 
+-- Apple_Pie
+INSERT INTO esgcafe.food_recipe (food_no, ingredient_no, quantity) VALUES
+                                                                (12, 2, 1), -- Flour_Green
+                                                                (12, 6, 1), -- Butter
+                                                                (12, 7, 1), -- Egg
+                                                                (12, 8, 1), -- Milk
+                                                                (12, 9, 1), -- Apple
+                                                                (12, 16, 1); -- Vanilla
 
