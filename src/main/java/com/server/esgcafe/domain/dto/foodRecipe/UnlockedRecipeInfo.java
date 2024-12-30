@@ -8,5 +8,6 @@ import lombok.Getter;
 public class UnlockedRecipeInfo {
 
     private String foodName;
+    private String category;
 
 }

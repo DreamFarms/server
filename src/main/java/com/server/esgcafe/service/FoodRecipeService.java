@@ -58,7 +58,8 @@ public class FoodRecipeService {
 
         List<UnlockedRecipeInfo> recipeInfos = unlockedRecipes.stream()
                 .map(unlocked -> new UnlockedRecipeInfo(
-                        unlocked.getFood() != null ? unlocked.getFood().getName() : "Unknown"
+                        unlocked.getFood() != null ? unlocked.getFood().getName() : "Unknown",
+                        unlocked.getFood() != null ? unlocked.getFood().getCategory() : "Unknown"
                 ))
                 .collect(Collectors.toList());
 
@@ -93,6 +94,7 @@ public class FoodRecipeService {
 
         int resultState = 0;
         String breadName = null;
+        String category = null;
 
         // 인벤토리에서 재료 차감 (모든 경우)
         for (IngredientQuantity userIngredient : userIngredients) {
@@ -140,7 +142,7 @@ public class FoodRecipeService {
                 if (alreadyUnlocked) {
                     log.info("🍞 Already unlocked recipe : {}", food.getName());
 
-                    RecipeGuessResponse response = new RecipeGuessResponse(-1, food.getName());
+                    RecipeGuessResponse response = new RecipeGuessResponse(-1, food.getName(), food.getCategory());
                     log.info("🍞 Final Response Object: {}", response);
                     return response;
 
@@ -150,6 +152,7 @@ public class FoodRecipeService {
                 // 레시피 해금
                 breadName = food.getName();
                 resultState = 1;
+                category = food.getCategory();
 
                 // 해금된 레시피 저장하고 로그로 출력
                 userUnlockedRecipeService.saveUnlockedRecipe(user, food);
@@ -162,7 +165,7 @@ public class FoodRecipeService {
 
         log.info("🍞 Check user recipe guess End - Bread Name: {}", breadName);
 
-        return new RecipeGuessResponse(resultState, breadName);
+        return new RecipeGuessResponse(resultState, breadName, category);
     }
 
 }
