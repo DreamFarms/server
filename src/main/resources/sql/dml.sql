@@ -24,19 +24,19 @@ INSERT INTO esgcafe.ingredient (name, code) VALUES
                                           ('Vanilla', 2015);
 
 -- Insert foods
-INSERT INTO esgcafe.food (name, code, category) VALUES
-                            ('Sandwich', 1000, 'bread'),
-                            ('Icebox_Strawberry', 1001, 'dessert'),
-                            ('Donut_Chocolate', 1002, 'dessert'),
-                            ('ButterBar_Plane', 1003, 'dessert'),
-                            ('RollCake_Chocolate', 1004, 'dessert'),
-                            ('RollCake_Strawberry', 1005, 'dessert'),
-                            ('ButterRoll_Salted', 1006, 'bread'),
-                            ('Bread_Melon', 1007, 'bread'),
-                            ('Cake_Strawberry', 1008, 'dessert'),
-                            ('Cookie_Strawberry', 1009, 'dessert'),
-                            ('DinnerRoll', 1010, 'bread'),
-                            ('Apple_Pie', 1011, 'dessert');
+INSERT INTO esgcafe.food (name, code, category, price) VALUES
+                            ('Sandwich', 1000, 'bread', 500),
+                            ('Icebox_Strawberry', 1001, 'dessert', 1200),
+                            ('Donut_Chocolate', 1002, 'dessert', 300),
+                            ('ButterBar_Plane', 1003, 'dessert', 200),
+                            ('RollCake_Chocolate', 1004, 'dessert', 700),
+                            ('RollCake_Strawberry', 1005, 'dessert', 700),
+                            ('ButterRoll_Salted', 1006, 'bread', 200),
+                            ('Bread_Melon', 1007, 'bread', 200),
+                            ('Cake_Strawberry', 1008, 'dessert', 200),
+                            ('Cookie_Strawberry', 1009, 'dessert', 150),
+                            ('DinnerRoll', 1010, 'bread', 200),
+                            ('Apple_Pie', 1011, 'dessert', 1500);
 
 -- Insert food_recipe
 -- Sandwich
