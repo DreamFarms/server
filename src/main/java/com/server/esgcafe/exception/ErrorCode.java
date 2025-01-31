@@ -25,8 +25,10 @@ public enum ErrorCode {
     INVALID_ISSUER(HttpStatus.UNAUTHORIZED, "ID 토큰의 발급자(issuer)가 유효하지 않습니다."),
     ID_TOKEN_VERIFICATION_FAILED(HttpStatus.UNAUTHORIZED, "ID 토큰 검증에 실패했습니다."),
     INVALID_ID_TOKEN(HttpStatus.BAD_REQUEST, "ID 토큰이 비어있거나 유효하지 않습니다."),
-    MALFORMED_ID_TOKEN(HttpStatus.BAD_REQUEST, "ID 토큰 형식이 잘못되었습니다.")
-
+    MALFORMED_ID_TOKEN(HttpStatus.BAD_REQUEST, "ID 토큰 형식이 잘못되었습니다."),
+    TOKEN_EXCHANGE_FAILED(HttpStatus.BAD_REQUEST, "토큰 발급에 실패했습니다."),
+    MISSING_GOOGLE_CLIENT_ID(HttpStatus.NOT_FOUND, "Google Client ID가 필요합니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Refresh Token이 만료되었습니다.")
 
     ;
 

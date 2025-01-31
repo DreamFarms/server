@@ -7,7 +7,7 @@ import java.time.Instant;
 
 @Entity
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class User {
@@ -16,17 +16,27 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userNo;
 
-//    private String googleId;
-//    private String steamId;
+    private String googleId;
+    private String email;
 
-//    @Column(name = "login_time")
-//    private Instant loginTime;
+    @Column(name = "login_time")
+    private Instant loginTime;
 
-//    @Column(name = "logout_time")
-//    private Instant logoutTime;
+    @Column(name = "logout_time")
+    private Instant logoutTime;
 
     private String nickName;
 
-//    private String image;
+    private String refreshToken;
+
+    // 로그인 시간 갱신
+    public void updateLoginTime(Instant loginTime) {
+        this.loginTime = loginTime;
+    }
+
+    // Refresh Token 업데이트
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
 
 }
