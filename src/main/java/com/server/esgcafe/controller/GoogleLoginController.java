@@ -22,4 +22,20 @@ public class GoogleLoginController {
 
        return Response.success(result);
     }
+
+    @PostMapping("/token/refresh")
+    public Response<String> refresh(@RequestBody String refreshToken) {
+
+        String newAccessToken = googleLoginService.refreshAccessToken(refreshToken);
+
+        return Response.success(newAccessToken);
+    }
+
+//    @PostMapping("/decoding")
+//    public Response<String> decoding(@RequestBody String idToken) {
+//
+//        String payload = googleLoginService.decodeIdToken(idToken);
+//
+//        return Response.success(payload);
+//    }
 }
