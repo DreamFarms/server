@@ -53,6 +53,10 @@ dependencies {
 
     implementation 'io.grpc:grpc-context:1.55.1'
 
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'io.lettuce.core:lettuce-core' // Redis 클라이언트 (Lettuce)
+
 }
 
 task copyPrivate(type: Copy) {
