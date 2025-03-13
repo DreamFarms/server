@@ -29,6 +29,12 @@ public class User {
 
     private String refreshToken;
 
+    @Column(name = "gold")
+    private long gold;  // 유저가 보유한 게임 재화
+
+    @Column(name = "cash")
+    private long cash;  // 결제로 추가하는 재화
+
     // 로그인 시간 갱신
     public void updateLoginTime(Instant loginTime) {
         this.loginTime = loginTime;
@@ -37,6 +43,11 @@ public class User {
     // Refresh Token 업데이트
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    // 골드 추가
+    public void addGold(long amount) {
+        this.gold += amount;
     }
 
 }

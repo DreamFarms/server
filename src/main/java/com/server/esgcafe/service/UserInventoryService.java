@@ -83,7 +83,7 @@ public class UserInventoryService {
             Long itemId;
             ItemType itemType; // 변경된 부분
 
-            if (inventoryInfo.getName().startsWith("Food")) {
+            if (foodRepository.existsByName(inventoryInfo.getName())) {
                 // Food 찾기
                 Food food = foodRepository.findByName(inventoryInfo.getName())
                         .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
