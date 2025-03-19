@@ -23,6 +23,14 @@
 |:--:|:--:|
 | [강주연](https://github.com/juyeon0514) | [변지환](https://github.com/jimandy00) |
 
+## 👤 팀원 소개
+| 프로필 |    이름  | 소속  | 역할      | GitHub |
+|--------|-----------|---------|--------|--------|
+| <img src="https://avatars.githubusercontent.com/cykim1228" width="150px;" alt=""> | 김나영 | SERVER |  | [GitHub](https://github.com/kny3037) |
+| <img src="https://avatars.githubusercontent.com/MinkyoDev" width="150px;" alt=""> | 최영주 | ART |  | |
+| <img src="https://avatars.githubusercontent.com/juyeon0514" width="150px;" alt=""> | 강주연 | UNITY |  | [GitHub](https://github.com/juyeon0514) |
+| <img src="https://avatars.githubusercontent.com/jimandy00" width="150px;" alt=""> | 변지환 | UNITY |  | [GitHub](https://github.com/jimandy00) |
+
 <br/>
 
 ### Server 역할
