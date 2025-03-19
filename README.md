@@ -23,14 +23,6 @@
 |:--:|:--:|
 | [강주연](https://github.com/juyeon0514) | [변지환](https://github.com/jimandy00) |
 
-## 👤 팀원 소개
-| 프로필 |    이름  | 소속  | 역할      | GitHub |
-|--------|-----------|---------|--------|--------|
-| <img src="https://avatars.githubusercontent.com/kny3037" width="150px;" alt=""> | 김나영 | SERVER |  | [GitHub](https://github.com/kny3037) |
-| <img src="" width="150px;" alt=""> | 최영주 | ART |  | |
-| <img src="https://avatars.githubusercontent.com/juyeon0514" width="150px;" alt=""> | 강주연 | UNITY |  | [GitHub](https://github.com/juyeon0514) |
-| <img src="https://avatars.githubusercontent.com/jimandy00" width="150px;" alt=""> | 변지환 | UNITY |  | [GitHub](https://github.com/jimandy00) |
-
 <br/>
 
 ### Server 역할
@@ -38,7 +30,6 @@
 - 미니게임 종료 시 리워드 저장 통신 코드 구현
 - 레시피와 보유 재료 비교 후 제작 가능 여부 판단 코드 구현
 - 유저의 빵 판매 후 재고 관리 및 빵 개수 업데이트 코드 구현
-
 
 <br/>
 
