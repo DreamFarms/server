@@ -1,6 +1,6 @@
 package com.server.esgcafe.controller;
 
-import com.server.esgcafe.domain.dto.game.BreadSaleRequestDTO;
+import com.server.esgcafe.domain.dto.game.BreadSaleRequest;
 import com.server.esgcafe.domain.dto.game.GameResultRequest;
 import com.server.esgcafe.domain.dto.game.GameResultResponse;
 import com.server.esgcafe.exception.Response;
@@ -23,7 +23,7 @@ public class GameController {
     }
 
     @PostMapping("/sell")
-    public Response<String> sellBread(@RequestBody BreadSaleRequestDTO request) {
+    public Response<String> sellBread(@RequestBody BreadSaleRequest request) {
         gameService.sellBreadAsync(request);
         return Response.success("빵 판매 요청 완료. (비동기 처리 중)");
     }
