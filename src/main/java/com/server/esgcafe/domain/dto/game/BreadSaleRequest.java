@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BreadSaleRequestDTO {
+public class BreadSaleRequest {
 
     private String nickname;
-//    private Long npcId;  // 어떤 NPC가 사갔는지
-    private String name; // 🥖 구매한 빵
-    private int quantity; // 🥖 구매 개수
+    private List<BreadSaleItem> breadList;
 }

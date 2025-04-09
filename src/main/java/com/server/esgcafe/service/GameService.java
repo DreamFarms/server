@@ -1,9 +1,6 @@
 package com.server.esgcafe.service;
 
-import com.server.esgcafe.domain.dto.game.BreadSaleRequestDTO;
-import com.server.esgcafe.domain.dto.game.GameResultRequest;
-import com.server.esgcafe.domain.dto.game.GameResultResponse;
-import com.server.esgcafe.domain.dto.game.SoldBreadRequest;
+import com.server.esgcafe.domain.dto.game.*;
 import com.server.esgcafe.domain.entity.Food;
 import com.server.esgcafe.domain.entity.Game;
 import com.server.esgcafe.domain.entity.User;
@@ -41,33 +38,38 @@ public class GameService {
 
     // 빵 판매 요청 → Redis Queue 저장
     @Async
-    public CompletableFuture<Void> sellBreadAsync(BreadSaleRequestDTO request) {
+    public CompletableFuture<Void> sellBreadAsync(BreadSaleRequest request) {
 
-        Food food = foodRepository.findByName(request.getName())
-                .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+        log.info("request nickname : {}", request.getNickname());
+        log.info("request breadItems : {}", request.getBreadList());
 
         User user = userRepository.findByNickName(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        UserInventory userInventory = userInventoryRepository.findByUserAndFoodOrIngredientNoAndItemType(user, food.getFoodNo(), ItemType.FOOD)
-                .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+        for (BreadSaleItem item : request.getBreadList()) {
+            Food food = foodRepository.findByName(item.getName())
+                    .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
 
-        // 빵 보유 개수가 충분한 지 확인
-        if (userInventory.getCount() < request.getQuantity()) {
-            throw new AppException(ErrorCode.NOT_ENOUGH_BREAD);
+            UserInventory userInventory = userInventoryRepository
+                    .findByUserAndFoodOrIngredientNoAndItemType(user, food.getFoodNo(), ItemType.FOOD)
+                    .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+
+            // 빵 보유 개수 확인
+            if (userInventory.getCount() < item.getQuantity()) {
+                throw new AppException(ErrorCode.NOT_ENOUGH_BREAD);
+            }
+
+            // Redis에 판매 정보 저장
+            String saleData = user.getUserNo() + "," + food.getFoodNo() + "," + item.getQuantity();  //request.getNpcId() + "," +
+            redisTemplate.opsForList().leftPush(SALES_QUEUE, saleData);
+
+            System.out.println("✅ [DEBUG] Redis에 데이터 저장됨: " + saleData);
         }
-
-        // Redis에 판매 정보 저장
-        String saleData = user.getUserNo() + "," +  food.getFoodNo() + "," + request.getQuantity();  //request.getNpcId() + "," +
-        redisTemplate.opsForList().leftPush(SALES_QUEUE, saleData);
-
-        System.out.println("✅ [DEBUG] Redis에 데이터 저장됨: " + saleData);
-
         return CompletableFuture.completedFuture(null);
     }
 
     // 5초마다 Redis Queue에서 판매 데이터 가져와 DB 반영
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 5000)
     @Async
     public CompletableFuture<Void> processBreadSalesAsync() {
 
