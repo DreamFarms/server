@@ -5,12 +5,15 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.server.esgcafe.configuration.jwt.JwtProvider;
+import com.server.esgcafe.domain.dto.foodRecipe.UnlockedRecipeInfo;
 import com.server.esgcafe.domain.dto.user.GoogleLoginRequest;
+import com.server.esgcafe.domain.dto.user.GoogleLoginResponse;
 import com.server.esgcafe.domain.dto.user.TokenDto;
-import com.server.esgcafe.domain.entity.User;
+import com.server.esgcafe.domain.dto.userInventory.UserInventoryResponse;
+import com.server.esgcafe.domain.entity.*;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
-import com.server.esgcafe.repository.UserRepository;
+import com.server.esgcafe.repository.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -24,7 +27,9 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -44,18 +49,30 @@ public class GoogleLoginService {
     }
 
     private final GoogleIdTokenVerifier verifier;
-    private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
+    private final UserRepository userRepository;
+    private final FoodRepository foodRepository;
+    private final IngredientRepository ingredientRepository;
+    private final UserInventoryRepository userInventoryRepository;
+    private final UserUnlockedRecipeRepository userUnlockedRecipeRepository;
 
-    public GoogleLoginService(@Value("${google.client-id}") String clientId, UserRepository userRepository, JwtProvider jwtProvider) {
+
+    public GoogleLoginService(@Value("${google.client-id}") String clientId, UserRepository userRepository,
+                              JwtProvider jwtProvider, UserInventoryRepository userInventoryRepository,
+                              UserUnlockedRecipeRepository userUnlockedRecipeRepository, FoodRepository foodRepository, IngredientRepository ingredientRepository) {
 
         if (clientId == null || clientId.isEmpty()) {
             throw new AppException(ErrorCode.MISSING_GOOGLE_CLIENT_ID);
         }
         System.out.println("Client ID: " + clientId);
 
-        this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
+        this.userRepository = userRepository;
+        this.foodRepository = foodRepository;
+        this.ingredientRepository = ingredientRepository;
+        this.userInventoryRepository = userInventoryRepository;
+        this.userUnlockedRecipeRepository = userUnlockedRecipeRepository;
+
         this.verifier = new GoogleIdTokenVerifier.Builder(
                 new NetHttpTransport(),
                 new GsonFactory()
@@ -65,13 +82,10 @@ public class GoogleLoginService {
     }
 
     // ID Token을 받아 검증하고 검증 결과와 JWT 반환
-    public Map<String, String> processLoginToken(GoogleLoginRequest request) {
-
-        Map<String, String> response = new HashMap<>();
+    public GoogleLoginResponse processLoginToken(GoogleLoginRequest request) {
 
         try {
             String idToken = request.getIdToken();
-
             log.info("idToken : {}", idToken);
 
             GoogleIdToken.Payload payload = verifyIdToken(idToken);
@@ -93,21 +107,42 @@ public class GoogleLoginService {
             user.updateRefreshToken(tokenDto.getRefreshToken());
             userRepository.save(user);
 
-            response.put("status", "success");
-            response.put("message", "ID Token is valid.");
-            response.put("accessToken", tokenDto.getAccessToken());
-            response.put("refreshToken", tokenDto.getRefreshToken());
+            // 1. 인벤토리 + 이름 조회
+            List<UserInventory> inventoryEntities = userInventoryRepository.findByUser(user);
+            List<UserInventoryResponse> inventoryList = inventoryEntities.stream()
+                    .map(inv -> {
+                        String name = switch (inv.getItemType()) {
+                            case FOOD -> foodRepository.findById(inv.getFoodOrIngredientNo())
+                                    .map(Food::getName)
+                                    .orElse("Unknown Food");
+                            case INGREDIENT -> ingredientRepository.findById(inv.getFoodOrIngredientNo())
+                                    .map(Ingredient::getName)
+                                    .orElse("Unknown Ingredient");
+                        };
 
-            return response;
+                        return new UserInventoryResponse(
+                                inv.getFoodOrIngredientNo().intValue(),
+                                name,
+                                inv.getCount()
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            // 2. 해금 레시피 변환
+            List<UserUnlockedRecipe> recipeEntities = userUnlockedRecipeRepository.findByUserWithFood(user);
+            List<UnlockedRecipeInfo> recipeList = recipeEntities.stream()
+                    .map(ur -> new UnlockedRecipeInfo(
+                            ur.getFood().getName(),
+                            ur.getFood().getCategory()
+                    ))
+                    .collect(Collectors.toList());
+
+            // 3. 최종 응답
+            return GoogleLoginResponse.success(tokenDto, inventoryList, recipeList);
+
         } catch (Exception e) {
-
             log.error("Login error: {}", e.getMessage());
-            response.put("status", "error");
-            response.put("message", e.getMessage());
-            response.put("accessToken", null);
-            response.put("refreshToken", null);
-
-            return response;
+            return GoogleLoginResponse.error(e.getMessage());
         }
     }
 
@@ -137,6 +172,5 @@ public class GoogleLoginService {
         }
         return token.getPayload();
     }
-
 
 }
