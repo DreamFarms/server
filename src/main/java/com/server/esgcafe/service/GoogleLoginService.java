@@ -26,9 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -141,7 +139,7 @@ public class GoogleLoginService {
             return GoogleLoginResponse.success(tokenDto, inventoryList, recipeList);
 
         } catch (Exception e) {
-            log.error("Login error: {}", e.getMessage());
+            log.error("Login error", e);
             return GoogleLoginResponse.error(e.getMessage());
         }
     }
