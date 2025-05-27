@@ -35,7 +35,8 @@ public class JwtProvider {
     private CryptoUtil cryptoUtil;
 
     // Access Token 만료 = 1시간, Refresh Token 만료 = 7일
-    private final long accessTokenValidTime = 7 * 24 * 60 * 60 * 1000L;   // 60 * 60 * 1000L
+//    private final long accessTokenValidTime = 7 * 24 * 60 * 60 * 1000L;   // 60 * 60 * 1000L
+    private final long accessTokenValidTime = 30L * 24 * 60 * 60 * 1000; // 테스트용 만료 30일
     private final long refreshTokenValidTime = 7 * 24 * 60 * 60 * 1000L;
 
 
@@ -73,13 +74,13 @@ public class JwtProvider {
     /**
      * Access Token + Refresh Token 동시 발급
      */
-    public TokenDto createToken(String userId, String email) {
+    public TokenDto createToken(String googleId, String email) {
 
         // Access Token
         long now = System.currentTimeMillis();
         Date accessExpire = new Date(now + accessTokenValidTime);
         String accessToken = Jwts.builder()
-                .setSubject(userId)
+                .setSubject(googleId)
                 .claim("email", email)
                 .setIssuedAt(new Date(now))
                 .setExpiration(accessExpire)
@@ -89,7 +90,7 @@ public class JwtProvider {
         // Refresh Token
         Date refreshExpire = new Date(now + refreshTokenValidTime);
         String refreshToken = Jwts.builder()
-                .setSubject(userId)
+                .setSubject(googleId)
                 .claim("type", "refresh")
                 .setIssuedAt(new Date(now))
                 .setExpiration(refreshExpire)
