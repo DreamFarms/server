@@ -35,6 +35,11 @@ public class User {
     @Column(name = "cash")
     private long cash;  // 결제로 추가하는 재화
 
+    // 닉네임 추가
+    public void updateNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
     // 로그인 시간 갱신
     public void updateLoginTime(Instant loginTime) {
         this.loginTime = loginTime;
