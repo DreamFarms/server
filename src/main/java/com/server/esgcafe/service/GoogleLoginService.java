@@ -82,6 +82,9 @@ public class GoogleLoginService {
     // ID Token을 받아 검증하고 검증 결과와 JWT 반환
     public GoogleLoginResponse processLoginToken(GoogleLoginRequest request) {
 
+        log.info("Google Login start");
+        log.info("Google Login request: " + request);
+
         try {
             String idToken = request.getIdToken();
             log.info("idToken : {}", idToken);
@@ -96,6 +99,7 @@ public class GoogleLoginService {
                         User newUser = User.builder()
                                 .googleId(googleId)
                                 .email(email)
+                                .nickName("빵빵빵의신규빵집")
                                 .build();
                         userRepository.save(newUser);
                         return newUser;
@@ -135,8 +139,10 @@ public class GoogleLoginService {
                     ))
                     .collect(Collectors.toList());
 
+            log.info("google login end");
+
             // 3. 최종 응답
-            return GoogleLoginResponse.success(tokenDto, inventoryList, recipeList);
+            return GoogleLoginResponse.success(tokenDto, user, inventoryList, recipeList);
 
         } catch (Exception e) {
             log.error("Login error", e);

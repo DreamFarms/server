@@ -2,6 +2,7 @@ package com.server.esgcafe.domain.dto.user;
 
 import com.server.esgcafe.domain.dto.foodRecipe.UnlockedRecipeInfo;
 import com.server.esgcafe.domain.dto.userInventory.UserInventoryResponse;
+import com.server.esgcafe.domain.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,11 +21,17 @@ public class GoogleLoginResponse {
     private String message;
     private String accessToken;
     private String refreshToken;
+    private Long userNo;
+    private String nickName;
+    private long gold;
+    private long cash;
+
     private List<UserInventoryResponse> inventory;
     private List<UnlockedRecipeInfo> unlockedRecipes;
 
     public static GoogleLoginResponse success(
             TokenDto tokenDto,
+            User user,
             List<UserInventoryResponse> inventory,
             List<UnlockedRecipeInfo> unlockedRecipes
     ) {
@@ -33,6 +40,10 @@ public class GoogleLoginResponse {
                 .message("ID Token is valid.")
                 .accessToken(tokenDto.getAccessToken())
                 .refreshToken(tokenDto.getRefreshToken())
+                .userNo(user.getUserNo())
+                .nickName(user.getNickName())
+                .gold(user.getGold())
+                .cash(user.getCash())
                 .inventory(inventory)
                 .unlockedRecipes(unlockedRecipes)
                 .build();
@@ -42,6 +53,10 @@ public class GoogleLoginResponse {
         return GoogleLoginResponse.builder()
                 .status("error")
                 .message(errorMessage)
+                .accessToken(null)
+                .refreshToken(null)
+                .userNo(null)
+                .nickName(null)
                 .accessToken(null)
                 .refreshToken(null)
                 .inventory(Collections.emptyList())
