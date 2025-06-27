@@ -1,7 +1,5 @@
 package com.server.esgcafe.repository;
 
-import com.server.esgcafe.domain.entity.Food;
-import com.server.esgcafe.domain.entity.Ingredient;
 import com.server.esgcafe.domain.entity.User;
 import com.server.esgcafe.domain.entity.UserInventory;
 import com.server.esgcafe.domain.enum_class.ItemType;
