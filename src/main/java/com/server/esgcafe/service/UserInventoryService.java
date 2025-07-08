@@ -34,29 +34,32 @@ public class UserInventoryService {
     private final IngredientRepository ingredientRepository;
     private final UserInventoryRepository userInventoryRepository;
 
-
     public List<UserInventoryResponse> getUserInventory(String nickname) {
+
+        log.info("Inventory start");
 
         User user = userRepository.findByNickName(nickname)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         List<UserInventory> userInventories = userInventoryRepository.findByUser(user);
 
-        // UserInventory 엔티티를 UserInventoryResponse로 변환
         List<UserInventoryResponse> response = new ArrayList<>();
         for (UserInventory inventory : userInventories) {
-            int code = inventory.getItemType() == ItemType.FOOD ?
-                    foodRepository.findById(inventory.getFoodOrIngredientNo()).get().getCode() :
-                    ingredientRepository.findById(inventory.getFoodOrIngredientNo()).get().getCode();
-
-            String name = inventory.getItemType() == ItemType.FOOD ?
-                    foodRepository.findById(inventory.getFoodOrIngredientNo()).get().getName() :
-                    ingredientRepository.findById(inventory.getFoodOrIngredientNo()).get().getName();
-
+            Long itemNo = inventory.getFoodOrIngredientNo();
             int count = inventory.getCount();
-            response.add(new UserInventoryResponse(code, name, count));
+
+            if (inventory.getItemType() == ItemType.FOOD) {
+                Food food = foodRepository.findByFoodNo(itemNo)
+                        .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+                response.add(new UserInventoryResponse(food.getCode(), food.getName(), count));
+            } else {
+                Ingredient ingredient = ingredientRepository.findByIngredientNo(itemNo)
+                        .orElseThrow(() -> new AppException(ErrorCode.INGREDIENT_NOT_FOUND));
+                response.add(new UserInventoryResponse(ingredient.getCode(), ingredient.getName(), count));
+            }
         }
 
+        log.info("User inventory response: {}", response);
         return response;
     }
 
