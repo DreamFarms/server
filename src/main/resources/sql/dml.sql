@@ -21,7 +21,8 @@ INSERT INTO esgcafe.ingredient (name, code) VALUES
                                           ('FreshStrawberry', 2012),
                                           ('Chocolate', 2013),
                                           ('MelonSyrup', 2014),
-                                          ('Vanilla', 2015);
+                                          ('Vanilla', 2015),
+                                          ('Sausage', 2016);
 
 -- Insert foods
 INSERT INTO esgcafe.food (name, code, category, price) VALUES
@@ -46,7 +47,7 @@ INSERT INTO esgcafe.food_recipe (food_no, ingredient_no, quantity) VALUES
                                                                (1, 7, 1),  -- Egg
                                                                (1, 4, 1);  -- Salt
 
--- Icebox_Strawberry
+-- Icebox_Strawberry(삭제 예정)
 INSERT INTO esgcafe.food_recipe (food_no, ingredient_no, quantity) VALUES
                                                                (2, 2, 1),  -- Flour_Green
                                                                (2, 5, 1), -- Sugar
@@ -142,3 +143,10 @@ INSERT INTO esgcafe.food_recipe (food_no, ingredient_no, quantity) VALUES
                                                                 (12, 9, 1), -- Apple
                                                                 (12, 16, 1); -- Vanilla
 
+-- Red_Bean_Bread
+
+-- Baguette
+
+-- Chocolate_Shell_Bread
+
+-- Sausage_Bread
