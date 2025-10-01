@@ -17,4 +17,6 @@ public interface UserUnlockedRecipeRepository extends JpaRepository<UserUnlocked
     List<UserUnlockedRecipe> findByUserWithFood(@Param("user") User user);
 
     boolean existsByUserAndFood(User user, Food food);
+
+    List<UserUnlockedRecipe> findByUserAndFoodIn(User user, List<Food> foods);
 }
