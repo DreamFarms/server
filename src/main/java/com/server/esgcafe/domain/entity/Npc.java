@@ -3,6 +3,9 @@ package com.server.esgcafe.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -14,17 +17,14 @@ public class Npc {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long npcNo;
 
-    // 종족
-    private String tribe;
+    @Column(nullable = false, length = 50)
+    private String name;
 
-    // npc 특성
-    private String npcTrait;
+    @Column(nullable = false, length = 200)
+    private String intro;     // 한 줄 소개
 
-    // npc 스폰 확률
-    private double spawnProbability;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "food_no")
-    private Food food;
+    @OneToMany(mappedBy = "npc", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<NpcPreferredFood> preferredFoods = new ArrayList<>();
 
 }
