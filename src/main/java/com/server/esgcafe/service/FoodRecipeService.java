@@ -65,6 +65,15 @@ public class FoodRecipeService {
 
         log.info("🍞 End recipe game start");
 
+        log.info("🍞 Ingredient Infos: {}", ingredientInfos.stream()
+                .map(info -> String.format("[name: %s, count: %d]", info.getIngredientName(), info.getCount()))
+                .collect(Collectors.joining(", ")));
+
+        log.info("🍞 Unlocked Recipe Infos: {}", recipeInfos.stream()
+                .map(info -> String.format("[name: %s, category: %s]", info.getFoodName(), info.getCategory()))
+                .collect(Collectors.joining(", ")));
+
+
         // 보유 재료와 해금된 레시피 정보를 담아서 반환
         return new RecipeGameStartResponse(ingredientInfos, recipeInfos);
     }
