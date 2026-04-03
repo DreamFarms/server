@@ -13,18 +13,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
     @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory();
-    }
-
-    @Bean
-    public RedisTemplate<String, String> redisTemplate() {
-
+    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory());
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new StringRedisSerializer());
+        template.setConnectionFactory(cf);
+
+        StringRedisSerializer s = new StringRedisSerializer();
+        template.setKeySerializer(s);
+        template.setValueSerializer(s);
+        template.setHashKeySerializer(s);
+        template.setHashValueSerializer(s);
+
+        template.afterPropertiesSet();
         return template;
     }
-
 }

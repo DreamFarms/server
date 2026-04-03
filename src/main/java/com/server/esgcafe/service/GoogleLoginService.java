@@ -11,6 +11,7 @@ import com.server.esgcafe.domain.dto.user.GoogleLoginResponse;
 import com.server.esgcafe.domain.dto.user.TokenDto;
 import com.server.esgcafe.domain.dto.userInventory.UserInventoryResponse;
 import com.server.esgcafe.domain.entity.*;
+import com.server.esgcafe.domain.enum_class.ItemType;
 import com.server.esgcafe.exception.AppException;
 import com.server.esgcafe.exception.ErrorCode;
 import com.server.esgcafe.repository.*;
@@ -19,7 +20,9 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GoogleLoginService {
 
+    private final RedisTemplate<String, String> redisTemplate;
+
     @Value("${google.client-id}")
     String CLIENT_ID;
 
@@ -40,6 +45,18 @@ public class GoogleLoginService {
     private String salt;
 
     private Key secretKey;
+
+    private static String invFoodKey(Long userNo) {
+        return "inv:food:" + userNo;
+    }
+
+    private static String goldKey(Long userNo) {
+        return "wallet:gold:" + userNo;
+    }
+
+    private static String cashKey(Long userNo) {
+        return "wallet:cash:" + userNo;
+    }
 
     @PostConstruct
     protected void init() {
@@ -55,9 +72,10 @@ public class GoogleLoginService {
     private final UserUnlockedRecipeRepository userUnlockedRecipeRepository;
 
 
-    public GoogleLoginService(@Value("${google.client-id}") String clientId, UserRepository userRepository,
+    public GoogleLoginService(RedisTemplate<String, String> redisTemplate, @Value("${google.client-id}") String clientId, UserRepository userRepository,
                               JwtProvider jwtProvider, UserInventoryRepository userInventoryRepository,
                               UserUnlockedRecipeRepository userUnlockedRecipeRepository, FoodRepository foodRepository, IngredientRepository ingredientRepository) {
+        this.redisTemplate = redisTemplate;
 
         if (clientId == null || clientId.isEmpty()) {
             throw new AppException(ErrorCode.MISSING_GOOGLE_CLIENT_ID);
@@ -109,6 +127,8 @@ public class GoogleLoginService {
             user.updateRefreshToken(tokenDto.getRefreshToken());
             userRepository.save(user);
 
+            loadUserDataToRedis(user);
+
             // 1. 인벤토리 + 이름 조회
             List<UserInventory> inventoryEntities = userInventoryRepository.findByUser(user);
             List<UserInventoryResponse> inventoryList = inventoryEntities.stream()
@@ -147,6 +167,53 @@ public class GoogleLoginService {
         } catch (Exception e) {
             log.error("Login error", e);
             return GoogleLoginResponse.error(e.getMessage());
+        }
+    }
+
+    // ===============================
+    // MySQL → Redis 적재
+    // ===============================
+    @Transactional(readOnly = true)
+    public void loadUserDataToRedis(User user) {
+
+        Long userNo = user.getUserNo();
+
+        // 🔥 기존 키 삭제
+        redisTemplate.delete(goldKey(userNo));
+        redisTemplate.delete(cashKey(userNo));
+        redisTemplate.delete(invFoodKey(userNo));
+
+        // =====================
+        // 1️⃣ 골드 세팅
+        // =====================
+        redisTemplate.opsForValue().set(
+                goldKey(userNo),
+                String.valueOf(user.getGold())
+        );
+
+        // =====================
+        // 2️⃣ 캐시 세팅
+        // =====================
+        redisTemplate.opsForValue().set(
+                cashKey(userNo),
+                String.valueOf(user.getCash())
+        );
+
+        // =====================
+        // 3️⃣ 인벤토리 세팅
+        // =====================
+        List<UserInventory> inventories =
+                userInventoryRepository.findByUserAndItemType(user, ItemType.FOOD);
+
+        String invKey = invFoodKey(userNo);
+
+        for (UserInventory inv : inventories) {
+
+            redisTemplate.opsForHash().put(
+                    invKey,
+                    String.valueOf(inv.getFoodOrIngredientNo()),
+                    String.valueOf(inv.getCount())
+            );
         }
     }
 

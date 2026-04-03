@@ -40,6 +40,14 @@ public class UserInventory extends BaseEntity{
         this.count -= soldCount;
     }
 
+    public void addInventoryCount(int delta) {
+        this.count += delta;
+
+        if (this.count < 0) {
+            throw new AppException(ErrorCode.NOT_ENOUGH_BREAD);
+        }
+    }
+
 
     @PrePersist
     public void validate() {
