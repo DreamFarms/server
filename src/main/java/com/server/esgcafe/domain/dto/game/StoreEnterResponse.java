@@ -11,11 +11,21 @@ public class StoreEnterResponse {
 
     private long gold;
     private long cash;
-    private List<BreadInfo> breads;
+    private List<InventoryBreadInfo> inventoryBreads;
+    private List<DisplayBreadInfo> displayBreads;
 
     @Getter
     @AllArgsConstructor
-    public static class BreadInfo {
+    public static class InventoryBreadInfo {
+        private String name;
+        private int count;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class DisplayBreadInfo {
+        private Integer tableNo;
+        private Integer slotNo;
         private String name;
         private int count;
     }
