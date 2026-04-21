@@ -34,4 +34,20 @@ public class RedisScriptConfig {
         return script;
     }
 
+    @Bean
+    public DefaultRedisScript<List> placeBreadScript() {
+        DefaultRedisScript<List> script = new DefaultRedisScript<>();
+        script.setLocation(new ClassPathResource("redis/PLACE_BREAD.lua"));
+        script.setResultType(List.class);
+        return script;
+    }
+
+    @Bean
+    public DefaultRedisScript<List> removeBreadScript() {
+        DefaultRedisScript<List> script = new DefaultRedisScript<>();
+        script.setLocation(new ClassPathResource("redis/REMOVE_BREAD.lua"));
+        script.setResultType(List.class);
+        return script;
+    }
+
 }

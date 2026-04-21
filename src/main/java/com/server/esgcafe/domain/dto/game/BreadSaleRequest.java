@@ -12,5 +12,5 @@ import java.util.List;
 public class BreadSaleRequest {
 
     private String nickname;
-    private List<BreadSaleItem> breadList;
+    private List<BreadSaleSlotItem> sales;
 }

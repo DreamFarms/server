@@ -30,7 +30,8 @@ public enum ErrorCode {
     MISSING_GOOGLE_CLIENT_ID(HttpStatus.NOT_FOUND, "Google Client ID가 필요합니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Refresh Token이 만료되었습니다."),
     QUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 Quest가 존재하지 않습니다."),
-    ACCESSTOKEN_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다.")
+    ACCESSTOKEN_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.")
 
 
     ;
