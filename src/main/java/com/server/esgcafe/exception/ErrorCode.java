@@ -31,7 +31,17 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Refresh Token이 만료되었습니다."),
     QUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 Quest가 존재하지 않습니다."),
     ACCESSTOKEN_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
-    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.")
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+    SHOP_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상점 상품을 찾을 수 없습니다."),
+    SHOP_PRODUCT_INACTIVE(HttpStatus.BAD_REQUEST, "현재 판매 중인 상품이 아닙니다."),
+    INVALID_SHOP_PRODUCT(HttpStatus.BAD_REQUEST, "구매할 수 없는 상품입니다."),
+    REAL_MONEY_PRODUCT(HttpStatus.BAD_REQUEST, "실제 결제 상품은 Google Play 검증 API를 사용해야 합니다."),
+    INSUFFICIENT_CASH(HttpStatus.BAD_REQUEST, "캐시가 부족합니다."),
+    INSUFFICIENT_GOLD(HttpStatus.BAD_REQUEST, "골드가 부족합니다."),
+    INVALID_PRODUCT_CODE(HttpStatus.BAD_REQUEST, "상품 코드가 올바르지 않습니다."),
+    NOT_ENOUGH_TICKET(HttpStatus.BAD_REQUEST, "티켓이 부족합니다."),
+    SHOP_REWARD_NOT_FOUND(HttpStatus.BAD_REQUEST, "상점 상품 보상 정보가 없습니다."),
+    INVALID_SHOP_REWARD(HttpStatus.BAD_REQUEST, "올바르지 않은 상점 보상 정보입니다.")
 
 
     ;
