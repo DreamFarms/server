@@ -249,3 +249,29 @@ WHERE n.name = '루니';
 # SELECT 1, n.npc_no, TRUE, 1
 # FROM esgcafe.npc n WHERE n.name = '루니'
 # ON DUPLICATE KEY UPDATE unlocked = TRUE, visit_count = 1;
+
+
+
+-- Shop Item Insert
+-- 3000번 ticket 상품 -- GOLD로 구매 → ticket 1개 지급
+INSERT INTO esgcafe.shop_product
+    (shop_product_no, product_code, google_product_id, product_name, product_type, payment_currency, price_amount, consumable, active )
+VALUES
+    ( 3000, 'TICKET', NULL, 'ticket', 'ITEM_PACKAGE', 'GOLD', 100, true, true );
+
+INSERT INTO shop_product_reward ( shop_product_no, reward_type, reward_code, reward_amount )
+VALUES ( 3000, 'TICKET', NULL, 1 );
+
+-- 3001번 gold 상품 -- CASH로 구매 → GOLD 3000개 지급
+INSERT INTO shop_product ( shop_product_no, product_code, google_product_id, product_name, product_type, payment_currency, price_amount, consumable, active )
+VALUES ( 3001, 'GOLD', NULL, 'gold', 'GOLD_PACKAGE', 'CASH', 10, true, true );
+
+INSERT INTO shop_product_reward ( shop_product_no, reward_type, reward_code, reward_amount )
+VALUES ( 3001, 'GOLD', NULL, 3000 );
+
+-- 3002번 Flour set 상품 -- GOLD로 구매 → flour 3종 각각 10개 지급
+INSERT INTO shop_product ( shop_product_no, product_code, google_product_id, product_name, product_type, payment_currency, price_amount, consumable, active )
+VALUES ( 3002, 'FLOUR_SET', NULL, 'Flour set', 'ITEM_PACKAGE', 'GOLD', 300, true, true );
+
+INSERT INTO shop_product_reward ( shop_product_no, reward_type, reward_code, reward_amount )
+VALUES ( 3002, 'INGREDIENT', 'Flour', 10 ), ( 3002, 'INGREDIENT', 'Flour_Green', 10 ), ( 3002, 'INGREDIENT', 'Flour_Red', 10 );
