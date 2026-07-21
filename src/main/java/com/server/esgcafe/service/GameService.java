@@ -228,6 +228,8 @@ public class GameService {
     @Transactional
     public StorePlaceResponse placeBread(StorePlaceRequest request) {
 
+        log.info("🍞 빵 배치 통신 시작");
+
         User user = userRepository.findByNickName(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -264,6 +266,8 @@ public class GameService {
 
         int inventoryCount = ((Number) res.get(1)).intValue();
         int slotCount = ((Number) res.get(2)).intValue();
+
+        log.info("🍞 빵 배치 통신 완료");
 
         return new StorePlaceResponse(
                 request.getTableNo(),

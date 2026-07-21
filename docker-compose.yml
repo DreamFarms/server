@@ -1,0 +1,100 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: esgcafe-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+09:00
+      # ---- 1GB 인스턴스용 메모리 절약 튜닝 ----
+      - --innodb-buffer-pool-size=64M
+      - --innodb-log-buffer-size=8M
+      - --key-buffer-size=8M
+      - --tmp-table-size=16M
+      - --max-heap-table-size=16M
+      - --table-open-cache=64
+      - --max-connections=30
+      - --performance-schema=OFF
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s   # 저사양이라 첫 기동이 느림
+    networks:
+      - esgcafe-net
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+
+  redis:
+    image: redis:7-alpine
+    container_name: esgcafe-redis
+    restart: unless-stopped
+    # appendonly 로 영속화하고 RDB 스냅샷(--save)은 꺼서 메모리/CPU 절약
+    command: ["redis-server", "--appendonly", "yes", "--save", "", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+    networks:
+      - esgcafe-net
+    deploy:
+      resources:
+        limits:
+          memory: 96m
+
+  app:
+    image: ${APP_IMAGE}
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    container_name: esg-cafe
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # DB 접속 (Compose 내부 서비스명 mysql 로 연결)
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      # Redis 접속 (application.yml 이 이 변수를 직접 참조)
+      SPRING_REDIS_HOST: ${SPRING_REDIS_HOST}
+      SPRING_REDIS_PORT: ${SPRING_REDIS_PORT}
+      # JVM 힙 상한 (1GB 인스턴스: -Xmx320m 권장)
+      JAVA_OPTS: ${JAVA_OPTS}
+      TZ: Asia/Seoul
+      # JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      # JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+    ports:
+      - "${APP_PORT}:8081"
+    networks:
+      - esgcafe-net
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+volumes:
+  mysql-data:
+  redis-data:
+
+networks:
+  esgcafe-net:
+    driver: bridge

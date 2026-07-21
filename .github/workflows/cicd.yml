@@ -50,9 +50,11 @@ jobs:
           key: ${{ secrets.EC2_PEMKEY }}
           envs: GITHUB_SHA
           script: |
-            sudo docker stop esg-cafe
-            sudo docker rm esg-cafe
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/esg-cafe
-            sudo docker run --name esg-cafe -d --network host -p 8081:8081 -e SPRING_DATASOURCE_URL="jdbc:mysql://${{ secrets.EC2_HOST }}:3306/esgcafe?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" -e SPRING_DATASOURCE_USERNAME=${{ secrets.MYSQL_USERNAME }} -e SPRING_DATASOURCE_PASSWORD=${{ secrets.MYSQL_PASSWORD }} ${{ secrets.DOCKER_REPO }}/esg-cafe
+            set -e
+            cd /home/ubuntu/esg-cafe
+            # 새 이미지 받아서 app 컨테이너만 교체 (mysql/redis/caddy 는 그대로 유지)
+            sudo docker compose pull app
+            sudo docker compose up -d
             sudo docker image prune -f
-            sudo docker logs esg-cafe
+            sudo docker compose ps
+            sudo docker compose logs --tail=50 app

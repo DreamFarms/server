@@ -37,6 +37,7 @@ public class ShopService {
         return ShopCurrencyResponse.from(user);
     }
 
+    // 인 게임 재화로 구매
     @Transactional
     public ShopPurchaseResponse purchase(ShopPurchaseRequest request) {
 
@@ -278,6 +279,10 @@ public class ShopService {
                 reward.getRewardAmount(),
                 userInventory.getCount());
     }
+
+    // 실물 재화로 구매
+    // google play store 연결 및 카드 결제 연결 필요
+
 }
 
 

@@ -1,0 +1,31 @@
+# Git / CI
+.git
+.gitignore
+.gitmodules
+.github
+
+# Gradle / 빌드 산출물 (이미지 안에서 새로 빌드하므로 제외)
+.gradle
+build
+out
+bin
+
+# IDE
+.idea
+*.iml
+*.iws
+*.ipr
+.vscode
+.settings
+.classpath
+.project
+
+# 로컬 전용 / 문서
+HELP.md
+DEPLOY.md
+README.md
+
+# 시크릿 (이미지에 절대 포함 금지)
+.env
+.env.*
+!.env.example
