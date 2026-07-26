@@ -92,50 +92,30 @@ public class FoodService {
 
         List<UserInventory> userInventories = userInventoryRepository.findByUser(user);
 
-        try {
-            // RemainingIngredient 리스트에서 재료 차감
-            for (RemainingIngredient remainingIngredient : request.getRemainingIngredients()) {
-                String ingredientName = remainingIngredient.getIngredientName();
-                int remainingQuantity = remainingIngredient.getRemainingQuantity();
+        // 몇 개를 만드는지 (값이 없거나 0이면 1개로 간주)
+        int makeCount = Math.max(1, request.getBreadCount());
 
-                // 재료의 ingredientNo를 찾아서 비교
-                Ingredient ingredient = food.getRecipes().stream()
-                        .filter(recipe -> recipe.getIngredient().getName().equals(ingredientName))
-                        .map(FoodRecipe::getIngredient)
-                        .findFirst()
-                        .orElseThrow(() -> new AppException(ErrorCode.INGREDIENT_NOT_FOUND));
+        // 레시피 기준으로 서버가 직접 차감
+        for (FoodRecipe recipe : food.getRecipes()) {
+            Ingredient ingredient = recipe.getIngredient();
+            int needed = recipe.getQuantity() * makeCount;
 
-                UserInventory userInventory = userInventories.stream()
-                        .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT &&
-                                inventory.getFoodOrIngredientNo().equals(ingredient.getIngredientNo())) // ingredientNo로 비교
-                        .findFirst()
-                        .orElseThrow(() -> new AppException(ErrorCode.INSUFFICIENT_INGREDIENTS));
+            UserInventory userInventory = userInventories.stream()
+                    .filter(inventory -> inventory.getItemType() == ItemType.INGREDIENT &&
+                            inventory.getFoodOrIngredientNo().equals(ingredient.getIngredientNo()))
+                    .findFirst()
+                    .orElseThrow(() -> new AppException(ErrorCode.INSUFFICIENT_INGREDIENTS));
 
-                // 재료 수량 차감
-                if (userInventory.getCount() < remainingQuantity) {
-                    throw new AppException(ErrorCode.INSUFFICIENT_INGREDIENTS);
-                }
-
-                userInventory.updateCount(userInventory.getCount() - remainingQuantity);
-                userInventoryRepository.save(userInventory);
+            if (userInventory.getCount() < needed) {
+                log.warn("🍞 재료 부족 - {} 필요 {}, 보유 {}", ingredient.getName(), needed, userInventory.getCount());
+                throw new AppException(ErrorCode.INSUFFICIENT_INGREDIENTS);
             }
 
-            log.info("🍞 userInventory 업데이트 성공");
-
-        } catch (AppException e) {
-            // 재료 부족/미보유 등 의미 있는 에러는 원본 그대로 전달 → ExceptionManager 가 올바른 상태코드(400/404)로 응답
-            log.warn("🍞 리워드 차감 실패 - {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            // 예상치 못한 예외만 래핑 (@Transactional 이 롤백 처리)
-            log.error("🍞 리워드 차감 중 예기치 못한 오류", e);
-            throw new RuntimeException("🍞 Failed to update user inventory", e);
+            userInventory.updateCount(userInventory.getCount() - needed);
+            userInventoryRepository.save(userInventory);
         }
 
-        // FoodUpdateResponse 생성
-        FoodUpdateResponse response = new FoodUpdateResponse(true, LocalDateTime.now());
-        log.info("🍞 userInventory 업데이트 및 리워드 차감 성공");
-
-        return response;
+        log.info("🍞 userInventory 업데이트 및 리워드 차감 성공 (빵 {}개분)", makeCount);
+        return new FoodUpdateResponse(true, LocalDateTime.now());
     }
 }
