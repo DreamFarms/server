@@ -115,6 +115,28 @@ public class FoodService {
             userInventoryRepository.save(userInventory);
         }
 
+        // 만든 빵을 유저 인벤토리에 추가 (이미 있으면 개수 증가, 없으면 새로 생성)
+        UserInventory breadInventory = userInventories.stream()
+                .filter(inventory -> inventory.getItemType() == ItemType.FOOD &&
+                        inventory.getFoodOrIngredientNo().equals(food.getFoodNo()))
+                .findFirst()
+                .orElse(null);
+
+        if (breadInventory != null) {
+            breadInventory.addInventoryCount(makeCount);
+            log.info("🍞 기존 빵 개수 증가 - name: {}, itemType: {}, foodNo: {}, +{}개 → 총 {}개",
+                    food.getName(), ItemType.FOOD, food.getFoodNo(), makeCount, breadInventory.getCount());
+        } else {
+            breadInventory = UserInventory.builder()
+                    .user(user)
+                    .foodOrIngredientNo(food.getFoodNo())
+                    .itemType(ItemType.FOOD)
+                    .count(makeCount)
+                    .build();
+            log.info("🍞 신규 빵 인벤토리 생성 - name: {}, itemType: {}, foodNo: {}, {}개",
+                    food.getName(), ItemType.FOOD, food.getFoodNo(), makeCount);
+        }
+        userInventoryRepository.save(breadInventory);
         log.info("🍞 userInventory 업데이트 및 리워드 차감 성공 (빵 {}개분)", makeCount);
         return new FoodUpdateResponse(true, LocalDateTime.now());
     }
