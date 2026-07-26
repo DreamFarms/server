@@ -82,7 +82,7 @@ public class FoodService {
     @Transactional
     public FoodUpdateResponse updateUserRewardsAndBread(FoodUpdateRequest request) {
 
-        log.info("🍞 userInventory 업데이트 및 리워드 차감 시작");
+        log.info("🍞 userInventory 업데이트 및 리워드 차감 시작 - 요청: {}", request);
 
         User user = userRepository.findByNickName(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -122,8 +122,13 @@ public class FoodService {
 
             log.info("🍞 userInventory 업데이트 성공");
 
+        } catch (AppException e) {
+            // 재료 부족/미보유 등 의미 있는 에러는 원본 그대로 전달 → ExceptionManager 가 올바른 상태코드(400/404)로 응답
+            log.warn("🍞 리워드 차감 실패 - {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
-            // 예외 발생 시 롤백
+            // 예상치 못한 예외만 래핑 (@Transactional 이 롤백 처리)
+            log.error("🍞 리워드 차감 중 예기치 못한 오류", e);
             throw new RuntimeException("🍞 Failed to update user inventory", e);
         }
 
