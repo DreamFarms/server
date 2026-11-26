@@ -41,21 +41,27 @@ public class UserInventoryService {
         User user = userRepository.findByNickName(nickname)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        List<UserInventory> userInventories = userInventoryRepository.findByUser(user);
+        List<UserInventory> userInventories = userInventoryRepository.findByUser(user).stream()
+                .filter(inventory -> inventory.getItemType() != ItemType.DOUGH)
+                .toList();
+        return createInventoryResponse(userInventories, false);
+    }
 
+    public List<UserInventoryResponse> createInventoryResponse(List<UserInventory> userInventories, boolean includeItemType) {
         List<UserInventoryResponse> response = new ArrayList<>();
         for (UserInventory inventory : userInventories) {
             Long itemNo = inventory.getFoodOrIngredientNo();
             int count = inventory.getCount();
 
-            if (inventory.getItemType() == ItemType.FOOD) {
+            ItemType itemType = includeItemType ? inventory.getItemType() : null;
+            if (inventory.getItemType() == ItemType.FOOD || inventory.getItemType() == ItemType.DOUGH) {
                 Food food = foodRepository.findByFoodNo(itemNo)
                         .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
-                response.add(new UserInventoryResponse(food.getCode(), food.getName(), count));
+                response.add(new UserInventoryResponse(food.getCode(), food.getName(), count, itemType));
             } else {
                 Ingredient ingredient = ingredientRepository.findByIngredientNo(itemNo)
                         .orElseThrow(() -> new AppException(ErrorCode.INGREDIENT_NOT_FOUND));
-                response.add(new UserInventoryResponse(ingredient.getCode(), ingredient.getName(), count));
+                response.add(new UserInventoryResponse(ingredient.getCode(), ingredient.getName(), count, itemType));
             }
         }
 

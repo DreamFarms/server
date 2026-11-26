@@ -136,9 +136,10 @@ public class GoogleLoginService {
             // 1. 인벤토리 + 이름 조회
             List<UserInventory> inventoryEntities = userInventoryRepository.findByUser(user);
             List<UserInventoryResponse> inventoryList = inventoryEntities.stream()
+                    .filter(inv -> inv.getItemType() != ItemType.DOUGH)
                     .map(inv -> {
                         String name = switch (inv.getItemType()) {
-                            case FOOD -> foodRepository.findById(inv.getFoodOrIngredientNo())
+                            case FOOD, DOUGH -> foodRepository.findById(inv.getFoodOrIngredientNo())
                                     .map(Food::getName)
                                     .orElse("Unknown Food");
                             case INGREDIENT -> ingredientRepository.findById(inv.getFoodOrIngredientNo())
