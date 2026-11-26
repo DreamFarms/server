@@ -10,6 +10,7 @@ import com.server.esgcafe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -20,8 +21,9 @@ import java.util.Optional;
 public class UserTestService {
 
     private final UserRepository userRepository;
+    private final CustomizationService customizationService;
 
-
+    @Transactional
     public UserSaveTestResponse processTempUserByNickname(UserSaveRequest request) {
 
         String nickname = normalizeNickname(request.getNickname());
@@ -52,6 +54,7 @@ public class UserTestService {
         newUser.updateLoginTime(Instant.now());
 
         User savedUser = userRepository.save(newUser);
+        customizationService.initializeDefaultCustomizations(savedUser);
 
         log.info("신규 유저 임시 회원가입 완료 - userNo: {}, nickname: {}",
                 savedUser.getUserNo(),

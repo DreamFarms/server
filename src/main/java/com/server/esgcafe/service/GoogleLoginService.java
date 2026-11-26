@@ -70,11 +70,13 @@ public class GoogleLoginService {
     private final IngredientRepository ingredientRepository;
     private final UserInventoryRepository userInventoryRepository;
     private final UserUnlockedRecipeRepository userUnlockedRecipeRepository;
+    private final CustomizationService customizationService;
 
 
     public GoogleLoginService(RedisTemplate<String, String> redisTemplate, @Value("${google.client-id}") String clientId, UserRepository userRepository,
                               JwtProvider jwtProvider, UserInventoryRepository userInventoryRepository,
-                              UserUnlockedRecipeRepository userUnlockedRecipeRepository, FoodRepository foodRepository, IngredientRepository ingredientRepository) {
+                              UserUnlockedRecipeRepository userUnlockedRecipeRepository, FoodRepository foodRepository,
+                              IngredientRepository ingredientRepository, CustomizationService customizationService) {
         this.redisTemplate = redisTemplate;
 
         if (clientId == null || clientId.isEmpty()) {
@@ -88,6 +90,7 @@ public class GoogleLoginService {
         this.ingredientRepository = ingredientRepository;
         this.userInventoryRepository = userInventoryRepository;
         this.userUnlockedRecipeRepository = userUnlockedRecipeRepository;
+        this.customizationService = customizationService;
 
         this.verifier = new GoogleIdTokenVerifier.Builder(
                 new NetHttpTransport(),
@@ -119,8 +122,9 @@ public class GoogleLoginService {
                                 .email(email)
                                 .nickName("빵빵빵의신규빵집")
                                 .build();
-                        userRepository.save(newUser);
-                        return newUser;
+                        User savedUser = userRepository.save(newUser);
+                        customizationService.initializeDefaultCustomizations(savedUser);
+                        return savedUser;
                     });
 
             TokenDto tokenDto = jwtProvider.createToken(googleId, email);
