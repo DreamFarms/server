@@ -85,7 +85,8 @@ public class FoodRecipeService {
 
         log.info("🍞 Request received: {}", request);
 
-        User user = userRepository.findByNickName(request.getNickname())
+        // 반죽 결과 정산과 같은 사용자 잠금을 재료 조회 전에 획득한다.
+        User user = userRepository.findByNickNameForUpdate(request.getNickname())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // 유저가 제출한 재료와 수량
